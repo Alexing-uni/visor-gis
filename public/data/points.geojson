@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Punto A",
+        "tipo": "Demostración"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          517136.4360488719,
+          8254286.9167651795
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Punto B",
+        "tipo": "Demostración"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          540693.2516861677,
+          8250938.266368669
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Punto C",
+        "tipo": "Demostración"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          548172.8838067529,
+          8243180.353678662
+        ]
+      }
+    }
+  ]
+}

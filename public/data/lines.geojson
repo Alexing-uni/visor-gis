@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Corredor Norte",
+        "estado": "Ejemplo"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -68.78,
+            -15.7
+          ],
+          [
+            -68.68,
+            -15.76
+          ],
+          [
+            -68.58,
+            -15.81
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Corredor Sur",
+        "estado": "Ejemplo"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -68.88,
+            -15.9
+          ],
+          [
+            -68.75,
+            -15.85
+          ],
+          [
+            -68.58,
+            -15.81
+          ]
+        ]
+      }
+    }
+  ]
+}
