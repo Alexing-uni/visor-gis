@@ -1,59 +1,75 @@
-# Visor geoespacial con DeckGL
+# Visor GIS — datos reales del tutor
 
-Visor GIS extensible basado en la guía funcional del proyecto. Muestra puntos, líneas y polígonos sobre MapLibre, transforma sus coordenadas con proj4 y guarda la configuración de capas en SQLite.
+React + TypeScript + Vite, MapLibre, DeckGL, Ant Design, proj4 y Turf. Backend Express y base SQLite para conservar los ajustes de las capas. Esta versión integra los tres GeoJSON recibidos en GIS_Proyectin.zip.
 
-## Abrir el proyecto en VS Code (Windows)
+| Capa | Elementos | Geometría | Origen | Zona |
+| --- | ---: | --- | --- | --- |
+| Puntos | 9.999 | Point | EPSG:31994 | Chile |
+| Geología | 399 | Polygon | OGC:CRS84 | Chile |
+| Viales | 6.233 | MultiLineString, XYZ | EPSG:4258 | Asturias, España |
 
-1. Instala [Node.js 24](https://nodejs.org/) y [Git](https://git-scm.com/).
-2. Clona el repositorio y entra en la carpeta:
+Las capas están en dos regiones. El visor se abre en Chile; usa **Encuadrar** en Viales para desplazarte a Asturias.
 
-   ```powershell
-   git clone https://github.com/TU_USUARIO/visor-gis.git
-   cd visor-gis
-   code .
-   npm.cmd ci
-   npm.cmd run dev
-   ```
+## Ejecutar en Windows
 
-3. Abre la dirección que indique Vite, normalmente `http://localhost:5173`.
+Requiere Node.js 24 o superior. Abre la carpeta que contiene este README y package.json en VS Code; en la terminal integrada ejecuta:
 
-Si el comando `code .` no está disponible, abre VS Code y elige **Archivo → Abrir carpeta… → visor-gis**. En PowerShell usamos `npm.cmd` porque algunas políticas corporativas bloquean `npm.ps1`.
-
-## Estructura para explorar en VS Code o GitHub
-
-```text
-visor-gis/
-├── .github/workflows/ci.yml   Compilación al subir cambios
-├── docs/ARCHITECTURE.md       Diagrama y flujo de datos
-├── public/data/                GeoJSON de ejemplo
-├── server/index.js             API y SQLite
-├── src/
-│   ├── lib/api.ts              Cliente HTTP
-│   ├── lib/geojson.ts          Validación y proyecciones
-│   ├── main.tsx                Visor y controles
-│   ├── style.css               Aspecto visual
-│   └── types.ts                Tipos de capa y entidad
-├── index.html
-├── package.json
-└── vite.config.ts
+```powershell
+npm.cmd ci
+npm.cmd run dev
 ```
 
-## Funcionalidades
+Abre la dirección indicada por Vite, normalmente http://127.0.0.1:5173. La API usa el puerto 3001. Ambos procesos se detienen con Ctrl+C. `npm.cmd` evita el bloqueo de npm.ps1 que puede imponer PowerShell.
 
-- Mapa navegable y tres capas independientes de demostración.
-- Puntos EPSG:31994 → EPSG:4326; líneas EPSG:4258 → EPSG:4326; polígonos EPSG:4326.
-- Visibilidad, nombre, color, grosor, opacidad y orden persistentes en SQLite.
-- Selección de entidades, popup arrastrable, encuadre, búsqueda, estilos claro/oscuro, inclinación 2D/3D y bloqueo de giro.
+Para compilar y ejecutar la versión empaquetada:
 
-Los datos son de **demostración**. Sustituye `public/data/*.geojson` con los archivos del tutor, verificando antes su CRS y la geometría. Consulta [la arquitectura](docs/ARCHITECTURE.md) para saber dónde ampliar el código.
+```powershell
+npm.cmd run build
+npm.cmd start
+```
 
-## Comandos
+Abre http://127.0.0.1:3001. La base `server/visor.sqlite` se crea automáticamente.
 
-| Comando | Resultado |
+## Actualizar tu copia anterior
+
+1. Detén `npm.cmd run dev` con Ctrl+C.
+2. Guarda una copia de tu carpeta actual, o haz un commit de tus cambios locales.
+3. Copia el contenido de la carpeta visor-gis del ZIP sobre tu carpeta del proyecto. El ZIP no contiene `.git`, `node_modules` ni una base de datos: tu historial y SQLite local se conservan. Revisa antes de sobrescribir archivos de código que hayas modificado por tu cuenta.
+4. Ejecuta `npm.cmd ci`, `npm.cmd test` y `npm.cmd run dev`.
+5. Revisa los cambios con `git diff` y confirma los archivos que quieras subir a tu repositorio.
+
+SQLite añade automáticamente el radio independiente sin borrar los estilos guardados. Si conservas la base antigua, también se conservan sus grosores; puedes ajustarlos desde las tarjetas.
+
+## Recorrido del código
+
+| Carpeta o archivo | Responsabilidad |
 | --- | --- |
-| `npm.cmd ci` | Instala exactamente las dependencias registradas. |
-| `npm.cmd run dev` | Inicia frontend y API para desarrollo. |
-| `npm.cmd run build` | Comprueba TypeScript y genera `dist/`. |
-| `npm.cmd start` | Sirve la versión compilada en `http://localhost:3001`. |
+| src/main.tsx | Entrada de React y configuración de Ant Design. |
+| src/App.tsx | Organización de la interfaz y selección de entidades. |
+| src/components/ | Mapa, tarjeta de capa, buscador y popup. |
+| src/hooks/useLayers.ts | Carga paralela, errores y cambios en la API. |
+| src/model/ | Interfaz Layer, BaseLayer y especializaciones del PDF. |
+| src/lib/ | HTTP, GeoJSON, CRS y destinos de cámara. |
+| src/types.ts | Contratos de datos compartidos por el frontend. |
+| server/ | API Express, SQLite y catálogo geográfico local. |
+| public/data/ | Los tres GeoJSON originales, con nombres normalizados. |
+| scripts/update-places.mjs | Regenera el catálogo local a partir de las geometrías. |
+| tests/ | Pruebas de datos reales, API, persistencia y migración. |
+| docs/ | Explicación paso a paso, procedencia y aceptación. |
 
-El backend escucha en el puerto 3001 y Vite redirige `/api` a él. SQLite se crea localmente en `server/visor.sqlite` y no se publica en GitHub. El mapa base CARTO y la búsqueda Nominatim necesitan acceso a Internet; para uso corporativo, confirma los proveedores permitidos.
+Lee [ARCHITECTURE.md](docs/ARCHITECTURE.md) para entender el funcionamiento completo, [DATOS.md](docs/DATOS.md) para los CRS y atributos y [ACEPTACION.md](docs/ACEPTACION.md) para comprobar los ocho hitos.
+
+## Búsqueda y conexiones externas
+
+El buscador consulta un catálogo local de cinco ubicaciones relacionado con Chile y Asturias. No es una búsqueda mundial ni envía consultas a Nominatim. Para ampliar su cobertura puede conectarse el geocodificador acordado con el tutor. `npm.cmd run data:catalog` regenera el catálogo tras actualizar los archivos; reinicia después la API.
+
+Los fondos Claro y Oscuro utilizan CARTO y requieren Internet. Sin fondo permite seguir trabajando con las geometrías locales. La vista 3D inclina la cámara; no genera terreno ni transforma las alturas.
+
+## Verificación
+
+```powershell
+npm.cmd test
+npm.cmd run build
+```
+
+Las seis pruebas automatizadas y la compilación se han ejecutado correctamente. La comprobación visual final de WebGL e interacciones está pendiente en tu navegador. GitHub Actions ejecuta también las pruebas y el build cuando se publica un cambio.

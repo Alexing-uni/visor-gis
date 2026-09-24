@@ -1,9 +1,25 @@
+import type { Feature, FeatureCollection, Geometry } from 'geojson';
+
 export type Kind = 'point' | 'line' | 'polygon';
-export type Layer = {
-  id: string; name: string; kind: Kind; crs: string; visible: boolean;
-  stroke: string; fill: string; width: number; opacity: number; sort_order: number;
+export type VectorGeometry = Exclude<Geometry, { type: 'GeometryCollection' }>;
+export type Properties = Record<string, unknown> | null;
+export type VectorFeature = Feature<VectorGeometry, Properties>;
+export type Collection = FeatureCollection<VectorGeometry, Properties>;
+export type Bounds = [number, number, number, number];
+export type LayerConfig = {
+  id: string;
+  name: string;
+  kind: Kind;
+  source: string;
+  crs: string;
+  visible: boolean;
+  stroke: string;
+  fill: string;
+  width: number;
+  opacity: number;
+  radius: number;
+  sort_order: number;
 };
-export type Geometry = {type: string; coordinates: unknown};
-export type Feature = {type: 'Feature'; geometry: Geometry; properties: Record<string, unknown>};
-export type Collection = {type: 'FeatureCollection'; features: Feature[]};
-export type Pick = {layerId: string; properties: Record<string, unknown>; x: number; y: number};
+export type LayerPatch = Partial<Pick<LayerConfig, 'name' | 'visible' | 'stroke' | 'fill' | 'width' | 'opacity' | 'radius'>>;
+export type Selection = { layerId: string; feature: VectorFeature; x: number; y: number };
+export type Place = { id: string; label: string; center: [number, number]; bounds?: Bounds; source: 'local' };
