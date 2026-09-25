@@ -1,3 +1,5 @@
+> Documento histórico de la versión anterior. Para el estado actual consulta [MEMORIA.md](MEMORIA.md) y [VERIFICACION.md](VERIFICACION.md).
+
 # Arquitectura y recorrido del programa
 
 ## 1. Arranque
@@ -70,3 +72,4 @@ Se ha retirado el autocompletado contra la API pública de Nominatim. Un servici
 `tests/geojson.test.mjs` comprueba los datos reales, la validación, la transformación, los símbolos y ambos tipos de resultado geográfico. `tests/api.test.mjs` comprueba peticiones, persistencia y migración. GitHub Actions ejecuta npm ci, npm test y npm run build.
 
 `package-lock.json` fija las dependencias. `.gitignore` excluye SQLite, node_modules y dist. No excluye los GeoJSON de este proyecto: están incluidos en el paquete para que pueda ejecutarse.
+

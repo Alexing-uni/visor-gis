@@ -1,0 +1,70 @@
+[
+  {
+    "id": "points",
+    "label": "Área de puntos · Chile",
+    "keywords": "pendiente puntos chile",
+    "bounds": [
+      -73.02543634783139,
+      -40.11667733930714,
+      -72.42921075453404,
+      -39.64873933344307
+    ],
+    "center": [
+      -72.7273235511827,
+      -39.8827083363751
+    ],
+    "source": "local"
+  },
+  {
+    "id": "points-center",
+    "label": "Centro: Área de puntos · Chile",
+    "keywords": "centro pendiente puntos chile",
+    "center": [
+      -72.7273235511827,
+      -39.8827083363751
+    ],
+    "source": "local"
+  },
+  {
+    "id": "polygons",
+    "label": "Área geológica · Chile",
+    "keywords": "geologia poligonos chile",
+    "bounds": [
+      -73.723004278204,
+      -40.6704415455474,
+      -71.5055995807787,
+      -39.0176477319057
+    ],
+    "center": [
+      -72.61430192949135,
+      -39.844044638726544
+    ],
+    "source": "local"
+  },
+  {
+    "id": "lines",
+    "label": "Red viaria · Asturias, España",
+    "keywords": "viales calles lineas oviedo asturias espana",
+    "bounds": [
+      -5.893377,
+      43.329047,
+      -5.802098959999967,
+      43.397645
+    ],
+    "center": [
+      -5.847737979999984,
+      43.363346
+    ],
+    "source": "local"
+  },
+  {
+    "id": "lines-center",
+    "label": "Centro: Red viaria · Asturias, España",
+    "keywords": "centro viales calles lineas oviedo asturias espana",
+    "center": [
+      -5.847737979999984,
+      43.363346
+    ],
+    "source": "local"
+  }
+]

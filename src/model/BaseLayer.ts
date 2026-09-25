@@ -27,6 +27,7 @@ export abstract class BaseLayer implements Layer {
   getColor() { return { ...this.color }; }
   attributes(feature: VectorFeature) {
     const properties = feature.properties ?? {};
+    if (this.config.source === 'browser:import') return Object.entries(properties).flatMap(([label, value]) => value === null || value === undefined ? [] : [{ label, value: typeof value === 'object' ? JSON.stringify(value) : String(value) }]);
     return this.fields.flatMap(([key, label]) => {
       const value = properties[key];
       return value === null || value === undefined || value === '' || typeof value === 'object' ? [] : [{ label, value: String(value) }];

@@ -17,3 +17,4 @@ for (const [id, crs, kind, label, keywords] of definitions) {
   console.log(`${id}: ${data.features.length} entidades validadas`);
 }
 writeFileSync(new URL('../server/places.json', import.meta.url), JSON.stringify(places, null, 2) + '\n');
+writeFileSync(new URL('../public/data/places.json', import.meta.url), JSON.stringify(places, null, 2) + '\n');

@@ -1,4 +1,5 @@
 import React from 'react';
+import '@ant-design/v5-patch-for-react-19';
 import { createRoot } from 'react-dom/client';
 import { ConfigProvider } from 'antd';
 import esES from 'antd/locale/es_ES';

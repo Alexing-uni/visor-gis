@@ -1,3 +1,5 @@
+> Documento histórico de la versión anterior. Para el estado actual consulta [MEMORIA.md](MEMORIA.md) y [VERIFICACION.md](VERIFICACION.md).
+
 # Comprobación de requisitos
 
 ## Resultado automatizado
@@ -24,3 +26,4 @@ El buscador no ofrece cobertura mundial. La precisión de transformación es la 
 ## Si falta el fondo del mapa
 
 Claro y Oscuro necesitan acceso al proveedor CARTO. Selecciona Sin fondo para verificar las geometrías locales. Esto permite distinguir un fallo de red del mapa base de un problema de los datos.
+

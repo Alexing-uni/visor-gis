@@ -15,7 +15,7 @@ function object(value: unknown): value is Record<string, unknown> {
 export function canonicalCrs(value: string): string {
   if (/^(OGC:CRS84|CRS84|urn:ogc:def:crs:OGC:1\.3:CRS84)$/i.test(value)) return 'EPSG:4326';
   const code = /^EPSG:(\d+)$/i.exec(value)?.[1] ?? /^urn:(?:x-)?ogc:def:crs:EPSG:[^:]*:(\d+)$/i.exec(value)?.[1];
-  if (!code || !['31994', '4258', '4326'].includes(code)) throw new Error(`CRS no soportado: ${value}`);
+  if (!code || !['31994', '3857', '4258', '4326'].includes(code)) throw new Error(`CRS no soportado: ${value}`);
   return `EPSG:${code}`;
 }
 export function resolveCrs(raw: unknown, expected: string): string {

@@ -1,75 +1,128 @@
-# Visor GIS — datos reales del tutor
+# Visor GIS 0.4
 
-React + TypeScript + Vite, MapLibre, DeckGL, Ant Design, proj4 y Turf. Backend Express y base SQLite para conservar los ajustes de las capas. Esta versión integra los tres GeoJSON recibidos en GIS_Proyectin.zip.
+Explora capas geográficas, consulta sus atributos, analiza una zona y calcula recorridos reales en coche. React y TypeScript organizan la interfaz; **deck.gl dibuja los vectores, imágenes WMS/WMTS, selecciones y rutas**. MapLibre aporta el mapa base y el relieve.
 
-| Capa | Elementos | Geometría | Origen | Zona |
-| --- | ---: | --- | --- | --- |
-| Puntos | 9.999 | Point | EPSG:31994 | Chile |
-| Geología | 399 | Polygon | OGC:CRS84 | Chile |
-| Viales | 6.233 | MultiLineString, XYZ | EPSG:4258 | Asturias, España |
+[Repositorio](https://github.com/Alexing-uni/visor-gis) · [Guía GitHub Pages](docs/PAGES.md) · [Memoria completa](docs/MEMORIA.md) · [Memoria Word](docs/Visor_GIS_0.4.docx)
 
-Las capas están en dos regiones. El visor se abre en Chile; usa **Encuadrar** en Viales para desplazarte a Asturias.
+**Estado de entrega:** versión 0.4 implementada y comprobada localmente. El workflow de GitHub Actions publica la modalidad estática al actualizar `main`. Consulta [Actions](https://github.com/Alexing-uni/visor-gis/actions) para conocer el estado del despliegue y [la guía](docs/PAGES.md) para repetirlo.
 
-## Ejecutar en Windows
+## Empezar en Windows y Visual Studio Code
 
-Requiere Node.js 24 o superior. Abre la carpeta que contiene este README y package.json en VS Code; en la terminal integrada ejecuta:
+Instala Node.js 24 LTS y Git. Abre esta carpeta en VS Code y su terminal PowerShell:
 
 ```powershell
 npm.cmd ci
+npm.cmd test
 npm.cmd run dev
 ```
 
-Abre la dirección indicada por Vite, normalmente http://127.0.0.1:5173. La API usa el puerto 3001. Ambos procesos se detienen con Ctrl+C. `npm.cmd` evita el bloqueo de npm.ps1 que puede imponer PowerShell.
+Abre la URL indicada por Vite, normalmente http://127.0.0.1:5173. Express escucha en http://127.0.0.1:3001. Detén ambos con Ctrl+C. Se usa `npm.cmd` para evitar restricciones de ejecución de `npm.ps1`.
 
-Para compilar y ejecutar la versión empaquetada:
+Para la versión local compilada:
 
 ```powershell
 npm.cmd run build
 npm.cmd start
 ```
 
-Abre http://127.0.0.1:3001. La base `server/visor.sqlite` se crea automáticamente.
+Abre http://127.0.0.1:3001. SQLite se crea en `server/visor.sqlite`. Una base anterior conserva los estilos al migrarse. El servidor se limita por defecto a `127.0.0.1`; no incorpora cuentas ni autorización multiusuario.
 
-## Actualizar tu copia anterior
+Para trabajar **sin backend**, igual que en Pages:
 
-1. Detén `npm.cmd run dev` con Ctrl+C.
-2. Guarda una copia de tu carpeta actual, o haz un commit de tus cambios locales.
-3. Copia el contenido de la carpeta visor-gis del ZIP sobre tu carpeta del proyecto. El ZIP no contiene `.git`, `node_modules` ni una base de datos: tu historial y SQLite local se conservan. Revisa antes de sobrescribir archivos de código que hayas modificado por tu cuenta.
-4. Ejecuta `npm.cmd ci`, `npm.cmd test` y `npm.cmd run dev`.
-5. Revisa los cambios con `git diff` y confirma los archivos que quieras subir a tu repositorio.
+```powershell
+npm.cmd run dev:static
+```
 
-SQLite añade automáticamente el radio independiente sin borrar los estilos guardados. Si conservas la base antigua, también se conservan sus grosores; puedes ajustarlos desde las tarjetas.
+Para comprobar el paquete estático bajo la subcarpeta del repositorio:
 
-## Recorrido del código
+```powershell
+$env:VITE_BASE_PATH = '/visor-gis/'
+npm.cmd run build:pages
+npm.cmd run preview
+```
 
-| Carpeta o archivo | Responsabilidad |
+Abre http://127.0.0.1:4173/visor-gis/. Al volver a compilar el modo local en esa terminal, elimina la variable con `Remove-Item Env:VITE_BASE_PATH`. No abras `index.html` con doble clic: necesita un servidor HTTP.
+
+## Qué puedes hacer
+
+- **Capas:** activar, renombrar, ordenar, encuadrar, cambiar color, opacidad, grosor y radio. Pulsa una entidad para consultar sus atributos. Los datos originales se conservan.
+- **Análisis:** dibuja un rectángulo arrastrando o marcando dos esquinas. Incluye entidades que intersectan su geometría real, también el borde. Cada Feature cuenta una vez, incluso MultiPoint, MultiLineString y MultiPolygon. Calcula km²/ha, recuentos, estadísticas y medidas recortadas. Exporta JSON, CSV o entidades GeoJSON completas. [Criterio y límites](docs/ANALISIS.md).
+- **Rutas:** busca con Photon, selecciona cada resultado o elige A/B en el mapa. Puedes mover el mapa durante la elección, intercambiar puntos, calcular y limpiar. OSRM devuelve la geometría vial, distancia, tiempo estimado e indicaciones. Solo coche, sin tráfico en tiempo real. [Proveedor, errores y límites](docs/RUTAS.md).
+- **Fuentes:** ortofoto PNOA y red hidrográfica oficial del IGN, con atribución y opacidad. Cubren España; usa Ver España o encuadra Viales. Son imágenes WMS: no se cuentan entidades en ellas. Puedes registrar otros WMS y WMTS compatibles. [Fuentes](docs/FUENTES.md).
+- **Importar:** GeoJSON desde archivo o URL directa, máximo 30 MiB. Selecciona el CRS correcto; se normaliza a WGS84. Los datos mixtos se separan por geometría. Prueba `public/data/example-import.geojson`, una muestra ficticia claramente identificada. Una página de otro visor no es GeoJSON.
+- **Mapa y relieve:** fondos claro, oscuro o vacío; vista 2D/3D, giro y elevación Terrarium con exageración ajustable. Las capas deck.gl no se adaptan a la superficie del terreno; selección y puntos de ruta se realizan en 2D.
+
+El panel se pliega con la flecha o el botón de su herramienta. En ordenador puedes arrastrar su borde o usar las flechas del teclado al enfocar el separador. En móvil pasa a un panel inferior; al iniciar una selección se pliega para dejar libre el mapa. Los resultados vuelven al panel al terminar.
+
+## Datos y almacenamiento
+
+| Capa original | Entidades | CRS de origen | Zona |
+| --- | ---: | --- | --- |
+| Puntos | 9.999 | EPSG:31994 | Chile |
+| Geología | 399 | EPSG:4326 / CRS84 | Chile |
+| Viales | 6.233 | EPSG:4258, XYZ | Asturias |
+
+[Procedencia y atributos originales](docs/DATOS.md). La normalización conserva la Z sin transformar su datum vertical. Las medidas de análisis ignoran Z y relieve; son aproximaciones geográficas, no medidas topográficas. Identificadores, índices y códigos reconocidos se excluyen de las estadísticas; no se suman magnitudes conocidas no aditivas. Los atributos pertenecen a la entidad completa y no se prorratean por el área seleccionada.
+
+| Información | Modo local | Pages |
+| --- | --- | --- |
+| GeoJSON originales | Archivos del proyecto, leídos por API | Archivos estáticos públicos |
+| Estilos y orden originales | SQLite | IndexedDB de cada navegador |
+| GeoJSON importados y sus estilos | IndexedDB de cada navegador | IndexedDB de cada navegador |
+| Fuentes ráster y su opacidad | localStorage | localStorage |
+| Ruta y selección activa | Solo memoria; se pierden al recargar | Solo memoria; se pierden al recargar |
+
+Importar no sube archivos a GitHub ni al backend. Borrar los datos del navegador elimina las copias y preferencias locales; conserva los originales. Los proveedores externos reciben peticiones de mapa, búsquedas o coordenadas al usar sus funciones. Sin Internet puedes usar geometrías ya disponibles con Sin fondo; esta versión no implementa una aplicación offline ni precarga de servicios.
+
+## Publicación en GitHub Pages
+
+El workflow `.github/workflows/pages.yml` instala, prueba, compila la modalidad estática y publica `dist`. Pages **no ejecuta Express ni SQLite**. `.env.static` activa IndexedDB; Vite obtiene la ruta de recursos del repositorio mediante `actions/configure-pages`.
+
+1. Usa este repositorio o crea uno en GitHub y configura su remoto.
+2. Sube el código y `package-lock.json`, sin `node_modules`, bases SQLite ni archivos `.env` privados.
+3. En Settings → Pages → Build and deployment, selecciona **GitHub Actions**.
+4. Publica un commit en `main` o ejecuta el workflow desde Actions → Run workflow.
+5. Comprueba los trabajos build/deploy y abre la dirección que aparezca en Settings → Pages o en el entorno github-pages.
+6. Para actualizar, modifica los archivos fuente, ejecuta las pruebas y sube otro commit a `main`.
+
+La [guía detallada](docs/PAGES.md) incluye todos los comandos, rutas, errores habituales y diferencias de almacenamiento. La dirección esperada para este repositorio es https://alexing-uni.github.io/visor-gis/; su disponibilidad depende de que el despliegue termine correctamente.
+
+## Para entender y ampliar el proyecto
+
+| Archivo | Para qué sirve y cuándo modificarlo |
 | --- | --- |
-| src/main.tsx | Entrada de React y configuración de Ant Design. |
-| src/App.tsx | Organización de la interfaz y selección de entidades. |
-| src/components/ | Mapa, tarjeta de capa, buscador y popup. |
-| src/hooks/useLayers.ts | Carga paralela, errores y cambios en la API. |
-| src/model/ | Interfaz Layer, BaseLayer y especializaciones del PDF. |
-| src/lib/ | HTTP, GeoJSON, CRS y destinos de cámara. |
-| src/types.ts | Contratos de datos compartidos por el frontend. |
-| server/ | API Express, SQLite y catálogo geográfico local. |
-| public/data/ | Los tres GeoJSON originales, con nombres normalizados. |
-| scripts/update-places.mjs | Regenera el catálogo local a partir de las geometrías. |
-| tests/ | Pruebas de datos reales, API, persistencia y migración. |
-| docs/ | Explicación paso a paso, procedencia y aceptación. |
+| `src/App.tsx` | Conecta los paneles, capas, selecciones y extremos de ruta. |
+| `src/components/MapView.tsx` | Inicializa MapLibre y el overlay deck.gl; dibuja capas y gestiona la interacción. |
+| `src/components/LayerCard.tsx` | Controles de estilo y orden de cada vector. |
+| `src/model/` | Clases de puntos, líneas y polígonos; atributos del popup y símbolos. |
+| `src/hooks/useLayers.ts` | Carga, normalización y cola de guardado. |
+| `src/lib/analysis.ts` | Intersección, recorte, unidades, estadísticas y exportación. |
+| `src/lib/routing.ts` | Photon/OSRM, cachés, tiempos límite y tratamiento de errores. |
+| `src/lib/import.ts` | Validación de enlaces, formatos, tamaño y separación por geometría. |
+| `src/lib/storage.ts` | Persistencia IndexedDB mediante transacciones. |
+| `src/lib/geojson.ts` | Validación y transformación de coordenadas con proj4. |
+| `src/lib/raster.ts` | Catálogo oficial y construcción de peticiones WMS/WMTS. |
+| `src/config/defaultLayers.ts` | Registro de capas originales para el modo estático. |
+| `server/database.js` | Registro de originales y migraciones SQLite del modo local. |
+| `public/data/` | Datos originales, catálogo de lugares y ejemplo de importación. |
+| `src/style.css` | Distribución de paneles, estilos y adaptación a pantallas. |
+| `vite.config.ts` | Ruta base de publicación y proxy de desarrollo a la API. |
 
-Lee [ARCHITECTURE.md](docs/ARCHITECTURE.md) para entender el funcionamiento completo, [DATOS.md](docs/DATOS.md) para los CRS y atributos y [ACEPTACION.md](docs/ACEPTACION.md) para comprobar los ocho hitos.
+Para publicar una nueva capa propia, coloca su GeoJSON en `public/data/`, registra id, nombre, tipo, CRS y estilo en `src/config/defaultLayers.ts` y `server/database.js`. Añade la definición de proyección en `src/lib/geojson.ts` si no está soportada. Para personalizar atributos modifica las especializaciones de `src/model/`; los imports muestran todos sus atributos. Reinicia el backend y recompila Pages. La memoria explica ejemplos de código, migraciones y cómo reutilizar esta base para otro visor.
 
-## Búsqueda y conexiones externas
-
-El buscador consulta un catálogo local de cinco ubicaciones relacionado con Chile y Asturias. No es una búsqueda mundial ni envía consultas a Nominatim. Para ampliar su cobertura puede conectarse el geocodificador acordado con el tutor. `npm.cmd run data:catalog` regenera el catálogo tras actualizar los archivos; reinicia después la API.
-
-Los fondos Claro y Oscuro utilizan CARTO y requieren Internet. Sin fondo permite seguir trabajando con las geometrías locales. La vista 3D inclina la cámara; no genera terreno ni transforma las alturas.
-
-## Verificación
+## Comprobaciones y límites
 
 ```powershell
 npm.cmd test
 npm.cmd run build
+npm.cmd run build:pages
+npm.cmd run check:routing
+node scripts/check-sources-live.mjs --write
 ```
 
-Las seis pruebas automatizadas y la compilación se han ejecutado correctamente. La comprobación visual final de WebGL e interacciones está pendiente en tu navegador. GitHub Actions ejecuta también las pruebas y el build cuando se publica un cambio.
+Los dos últimos comandos requieren Internet y hacen consultas moderadas a servicios reales; no forman parte de las pruebas de CI. Los resultados fechados se guardan en `docs/routing-check.json` y `docs/sources-check.json`. El [registro de verificación](docs/VERIFICACION.md) diferencia pruebas automatizadas, navegador, servicios y comprobaciones pendientes.
+
+El visor admite los seis tipos simples/múltiples de GeoJSON. GeometryCollection, Shapefile, KML, WFS, WMTS con matrices arbitrarias, edición de geometrías, usuarios y datos compartidos requieren ampliaciones. No transforma una URL de aplicación en datos ni representa rectas como rutas. La carga completa y el análisis en el navegador limitan el volumen utilizable.
+
+La memoria se mantiene en `docs/MEMORIA.md`. `scripts/generate-docx.py` genera el Word con Python y `python-docx`; este paso no es necesario para ejecutar el visor. El índice usa estilos de título y se actualiza en Word con Actualizar campo → Actualizar toda la tabla.
+

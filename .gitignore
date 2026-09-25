@@ -1,6 +1,10 @@
 node_modules/
+.vite/
 dist/
 server/visor.sqlite*
 .env
 *.tsbuildinfo
 .vscode/settings.json
+
+.tmp/
+*.zip

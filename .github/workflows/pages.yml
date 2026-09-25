@@ -1,0 +1,51 @@
+name: Publicar visor en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Configurar Pages
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Compilar modalidad estática
+        run: npm run build:pages
+        env:
+          VITE_STORAGE_MODE: browser
+          # base_path vacío para sitios de usuario o dominios propios; /repo en sitios de proyecto.
+          VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+      - name: Subir sitio compilado
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar
+        id: deployment
+        uses: actions/deploy-pages@v4

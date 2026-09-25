@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-24T18:26:33.551Z",
+  "checks": [
+    {
+      "check": "Photon búsqueda Oviedo",
+      "ok": true,
+      "count": 5,
+      "first": {
+        "label": "Oviedo, Principado de Asturias, España",
+        "coordinates": [
+          -5.8795096,
+          43.3533452
+        ]
+      }
+    },
+    {
+      "check": "OSRM ruta Oviedo–Gijón",
+      "ok": true,
+      "metres": 32392.1,
+      "seconds": 1703.2,
+      "vertices": 703,
+      "steps": 30,
+      "accesses": [
+        154.6201026,
+        11.847238
+      ]
+    },
+    {
+      "check": "OSRM rechazo punto sin acceso",
+      "ok": true,
+      "message": "Algún punto no tiene acceso a la red de carreteras a menos de 1 km. Selecciona un punto más cercano a una carretera."
+    }
+  ],
+  "requests": [
+    {
+      "service": "https://photon.komoot.io",
+      "status": 200,
+      "cors": "*"
+    },
+    {
+      "service": "https://router.project-osrm.org",
+      "status": 200,
+      "cors": "*"
+    },
+    {
+      "service": "https://router.project-osrm.org",
+      "status": 400,
+      "cors": "*"
+    }
+  ]
+}
