@@ -1,0 +1,380 @@
+{
+  "checked_at": "2026-09-25T16:01:52.375127+00:00",
+  "source_commit": "526e3a3cb47ca768477ed90e6b876976ffde56c4",
+  "engine": "Shapely 2.1.2 / GEOS 3.13.1",
+  "feature_counts": {
+    "polygons": 399,
+    "lines": 6233,
+    "points": 9999,
+    "boundary": 1265
+  },
+  "invalid_geometries": {
+    "polygons": 0,
+    "lines": 0,
+    "points": 0,
+    "boundary": 0
+  },
+  "checks": [
+    {
+      "name": "polygons/full",
+      "app": 399,
+      "geos": 399,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/center",
+      "app": 288,
+      "geos": 288,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/outside",
+      "app": 0,
+      "geos": 0,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/triangle",
+      "app": 185,
+      "geos": 185,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/concave",
+      "app": 281,
+      "geos": 281,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-0-0",
+      "app": 14,
+      "geos": 14,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-0-1",
+      "app": 71,
+      "geos": 71,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-0-2",
+      "app": 21,
+      "geos": 21,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-1-0",
+      "app": 34,
+      "geos": 34,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-1-1",
+      "app": 133,
+      "geos": 133,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-1-2",
+      "app": 50,
+      "geos": 50,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-2-0",
+      "app": 18,
+      "geos": 18,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-2-1",
+      "app": 103,
+      "geos": 103,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "polygons/grid-2-2",
+      "app": 39,
+      "geos": 39,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/full",
+      "app": 6233,
+      "geos": 6233,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/center",
+      "app": 3558,
+      "geos": 3558,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/outside",
+      "app": 0,
+      "geos": 0,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/triangle",
+      "app": 2732,
+      "geos": 2732,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/concave",
+      "app": 3773,
+      "geos": 3773,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-0-0",
+      "app": 409,
+      "geos": 409,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-0-1",
+      "app": 1068,
+      "geos": 1068,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-0-2",
+      "app": 211,
+      "geos": 211,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-1-0",
+      "app": 563,
+      "geos": 563,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-1-1",
+      "app": 2038,
+      "geos": 2038,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-1-2",
+      "app": 330,
+      "geos": 330,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-2-0",
+      "app": 246,
+      "geos": 246,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-2-1",
+      "app": 819,
+      "geos": 819,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "lines/grid-2-2",
+      "app": 796,
+      "geos": 796,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/full",
+      "app": 9999,
+      "geos": 9999,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/center",
+      "app": 2654,
+      "geos": 2654,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/outside",
+      "app": 0,
+      "geos": 0,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/triangle",
+      "app": 2598,
+      "geos": 2598,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/concave",
+      "app": 5042,
+      "geos": 5042,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-0-0",
+      "app": 1069,
+      "geos": 1069,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-0-1",
+      "app": 1128,
+      "geos": 1128,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-0-2",
+      "app": 1064,
+      "geos": 1064,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-1-0",
+      "app": 1133,
+      "geos": 1133,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-1-1",
+      "app": 1174,
+      "geos": 1174,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-1-2",
+      "app": 1135,
+      "geos": 1135,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-2-0",
+      "app": 1083,
+      "geos": 1083,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-2-1",
+      "app": 1134,
+      "geos": 1134,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "points/grid-2-2",
+      "app": 1079,
+      "geos": 1079,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "boundary/square",
+      "app": 702,
+      "geos": 702,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "boundary/triangle",
+      "app": 556,
+      "geos": 556,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    },
+    {
+      "name": "boundary/concave",
+      "app": 1074,
+      "geos": 1074,
+      "missing": [],
+      "extra": [],
+      "warnings": []
+    }
+  ],
+  "passed": true
+}

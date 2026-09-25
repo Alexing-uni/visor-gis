@@ -8,6 +8,8 @@ La publicación se realiza en `Alexing-uni/visor-gis` mediante Git y el workflow
 
 ## Comprobaciones realizadas
 
+- Auditoría independiente del recuento: 45 selecciones contrastadas con GEOS, comparando los registros exactos, sin diferencias. Incluye las tres capas reales y 1.265 entidades sintéticas para bordes y geometrías múltiples. Véase [RECUENTO.md](RECUENTO.md).
+
 - Instalación mediante `npm.cmd ci`; dependencias fijadas en `package-lock.json`.
 - `npm.cmd test`: 42 pruebas superadas. Incluyen geometrías reales y múltiples, recorte de líneas/polígonos, huecos, contactos en bordes, estadísticas, exportación CSV, CRS, API y SQLite, migraciones, rutas, importación, transacciones IndexedDB y errores/reintentos ráster.
 - Compilación TypeScript y producción local; compilación estática con `VITE_BASE_PATH=/visor-gis/` y vista previa bajo esa subruta.
