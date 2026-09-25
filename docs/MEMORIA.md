@@ -22,7 +22,7 @@ La organización en herramientas separadas sigue patrones habituales de visores 
 
 La entrega identificada como 0.4 actualiza la base existente. Conserva los tres archivos geográficos originales: 9.999 puntos y 399 polígonos en Chile, y 6.233 entidades lineales en Asturias. Sus ubicaciones se mantienen separadas porque así son sus coordenadas. El botón de encuadre de cada capa permite pasar de una región a la otra.
 
-Se dispone de visualización vectorial con deck.gl, edición de estilos y orden de capas, importación de GeoJSON, análisis rectangular, exportaciones y rutas de coche. MapLibre proporciona el mapa base y el relieve. Las fuentes oficiales incluidas son ejemplos de servicios de imagen y necesitan Internet. Las rutas y la búsqueda de direcciones también dependen de servicios externos.
+Se dispone de visualización vectorial con deck.gl, edición de estilos y orden de capas, importación de GeoJSON, análisis rectangular y poligonal libre, exportaciones y rutas de coche. MapLibre proporciona el mapa base y el relieve. Las fuentes oficiales incluidas son ejemplos de servicios de imagen y necesitan Internet. Las rutas y la búsqueda de direcciones también dependen de servicios externos.
 
 La modalidad local conserva Express y SQLite. La modalidad estática evita llamar a la API local para cargar y personalizar las capas y puede publicarse en GitHub Pages. En esa modalidad las preferencias y las importaciones pertenecen al navegador utilizado; no se comparten entre personas ni entre dispositivos.
 
@@ -36,7 +36,7 @@ La columna de estado describe lo que contiene el proyecto. Las comprobaciones y 
 | --- | --- | --- |
 | Capas vectoriales y atributos | Implementada | deck.gl y geometrías originales normalizadas en memoria |
 | Estilos y orden de capas | Implementada | Nombre, visibilidad, colores, grosor, radio y opacidad |
-| Selección rectangular | Implementada | Dos esquinas mediante clics o toques; borde incluido |
+| Selección rectangular y libre | Implementada | Rectángulo de dos esquinas o polígono por vértices; análisis solo al cerrar; borde incluido |
 | Recuentos y estadísticas | Implementada | Entidades por capa y tipo; números finitos y exclusión de identificadores |
 | Medición dentro de la selección | Implementada | Recorte de líneas e intersección de polígonos con huecos |
 | Resaltado y exportación | Implementada | Resultados JSON y CSV; entidades completas en GeoJSON |
@@ -129,7 +129,7 @@ Interfaz React
     > modelos Layer > deck.gl
 ```
 
-Al cambiar una opacidad, la interfaz solicita guardar la configuración y actualiza el modelo. Al pulsar una entidad, deck.gl identifica el objeto y React muestra sus atributos. Al dibujar un rectángulo, analysis.ts recibe las colecciones vectoriales normalizadas, calcula el resultado y devuelve las entidades seleccionadas para resaltarlas. El análisis no necesita enviar esas entidades a un servidor.
+Al cambiar una opacidad, la interfaz solicita guardar la configuración y actualiza el modelo. Al pulsar una entidad, deck.gl identifica el objeto y React muestra sus atributos. Al confirmar un rectángulo o cerrar un polígono libre, analysis.ts recibe las colecciones vectoriales normalizadas, calcula el resultado y devuelve las entidades seleccionadas para resaltarlas. El análisis no necesita enviar esas entidades a un servidor.
 
 Las rutas siguen otro circuito: el texto de búsqueda se envía a Photon; las coordenadas elegidas se envían a OSRM; la respuesta se valida y su LineString se dibuja con deck.gl. WMS y WMTS devuelven imágenes por teselas; no pasan por el análisis vectorial. El terreno es una fuente de elevación que usa MapLibre para dar forma al mapa base.
 
@@ -173,11 +173,11 @@ Existe un límite relevante: las capas deck.gl se presentan sobre la cámara del
 
 ### 8.3 Seleccionar y analizar una superficie
 
-Abre Análisis, pulsa Dibujar rectángulo y marca dos esquinas opuestas con clics o toques. El rectángulo utiliza longitudes y latitudes de esas esquinas. En 3D su proyección en pantalla puede no parecer un rectángulo perfecto; su definición geográfica sigue siendo la misma. Borra o reinicia la selección para analizar otra zona.
+Abre Análisis, pulsa Dibujar rectángulo y marca dos esquinas opuestas con clics o toques. El rectángulo utiliza longitudes y latitudes de esas esquinas. La herramienta activa la vista 2D para seleccionar. También puedes elegir Libre por puntos: marca tres o más vértices y toca el primero, de color amarillo, o pulsa Cerrar y analizar. Mientras el trazo está abierto no se calculan resultados ni se conservan los de la selección anterior. Deshacer punto permite corregirlo; Cancelar descarta el borrador. Se admiten contornos cóncavos de un solo anillo, sin huecos, vértices repetidos ni cruces entre lados. Un error de validación mantiene el dibujo para corregirlo. Borra o reinicia la selección para analizar otra zona.
 
-Se seleccionan las entidades cuya geometría real intersecta el rectángulo, incluido su borde. Una prueba de envolvente acelera el descarte, pero el recuento no se basa únicamente en esa envolvente. Cada Feature cuenta una vez. Una MultiLineString con cinco partes es una entidad y aporta la longitud de todas sus partes interiores; una MultiPoint sigue siendo una entidad aunque contenga varios puntos dentro del área.
+Se seleccionan las entidades cuya geometría real intersecta la selección cerrada, incluido su borde. Una prueba de envolvente acelera el descarte, pero el recuento no se basa únicamente en esa envolvente. Cada Feature cuenta una vez. Una MultiLineString con cinco partes es una entidad y aporta la longitud de todas sus partes interiores; una MultiPoint sigue siendo una entidad aunque contenga varios puntos dentro del área.
 
-El panel muestra el área del rectángulo en km² y hectáreas, el total de entidades, los recuentos por capa y tipo, la longitud de líneas recortadas y la superficie de polígonos intersectados. Los huecos de los polígonos se respetan. Una entidad que solamente toca el borde puede contarse y aportar cero longitud o superficie. Las superficies de entidades superpuestas se suman; no se calcula su unión, de modo que su suma puede ser mayor que el rectángulo.
+El panel muestra el área de la selección en km² y hectáreas, el total de entidades, los recuentos por capa y tipo, la longitud de líneas recortadas y la superficie de polígonos intersectados. Los huecos de las entidades se respetan. En modo libre las líneas se dividen por cada cruce con el contorno y se miden sus intervalos interiores y de borde. El JSON exportado incluye la geometría cerrada en selection y su tipo en selectionKind. Una entidad que solamente toca el borde puede contarse y aportar cero longitud o superficie. Las superficies de entidades superpuestas se suman; no se calcula su unión, de modo que su suma puede ser mayor que la selección.
 
 Las estadísticas incluyen mínimo, máximo, suma y media cuando corresponden a los atributos numéricos finitos. Cada atributo muestra su propio n de valores. Se ignoran nulos, textos numéricos e identificadores. Una heurística por nombre también excluye coordenadas técnicas de celdas, índices y códigos como Riesgo y HasData. Se omiten sumas de pendientes, orientaciones, porcentajes, tasas, temperaturas, cotas, valoraciones y confianza cuando el nombre permite reconocerlos; las orientaciones tampoco reciben una media aritmética, porque necesitarían una media circular. Esta heurística es configurable y no sustituye metadatos del proveedor.
 
@@ -400,13 +400,13 @@ Las cuentas de usuario y grupos permitirían separar proyectos, asignar permisos
 
 Para mayor volumen, las mejoras principales serían índices espaciales, trabajo en Web Workers, simplificación controlada, carga por extensión y paginación. El análisis actual recorre los datos del navegador; aunque es apropiado para los ejemplos, millones de geometrías pueden bloquear la interfaz o agotar memoria. Las pruebas de rendimiento deben usar conjuntos representativos antes de fijar un límite de producción.
 
-Otras ampliaciones concretas son perfiles reales de bicicleta y caminata con un servicio adecuado, edición de geometrías, gestión de proyectos, medición sobre el terreno y adaptación de capas deck.gl a la elevación. Estas funciones se distinguen de las ya operativas: selección rectangular, estadísticas, importación, exportación y rutas de coche no son propuestas futuras.
+Otras ampliaciones concretas son perfiles reales de bicicleta y caminata con un servicio adecuado, edición de geometrías, gestión de proyectos, medición sobre el terreno y adaptación de capas deck.gl a la elevación. Estas funciones se distinguen de las ya operativas: selección rectangular y libre por puntos, estadísticas, importación, exportación y rutas de coche no son propuestas futuras.
 
 ## 15 Pruebas realizadas limitaciones y mejoras pendientes
 
 ### 15.1 Comprobaciones reproducibles
 
-Los tests se ejecutan con npm.cmd test. En la validación de esta entrega se han superado 37 pruebas automatizadas. Comprueban normalización de los tres datasets, validación de geometrías y CRS, atributos y símbolos de las capas, operaciones de API, persistencia SQLite, migraciones, análisis, rutas, importación, fuentes y almacenamiento del navegador mediante fake-indexeddb. npm.cmd run build ha superado TypeScript y la compilación de producción local. npm.cmd run build:pages es la comprobación reproducible de la variante estática.
+Los tests se ejecutan con npm.cmd test. En la validación de esta entrega se han superado 42 pruebas automatizadas. Comprueban normalización de los tres datasets, validación de geometrías y CRS, atributos y símbolos de las capas, operaciones de API, persistencia SQLite, migraciones, análisis, rutas, importación, fuentes y almacenamiento del navegador mediante fake-indexeddb. npm.cmd run build ha superado TypeScript y la compilación de producción local. npm.cmd run build:pages es la comprobación reproducible de la variante estática.
 
 En análisis se verifican puntos en el borde, MultiPoint contado una vez, líneas cuya envolvente cruza la selección pero cuya geometría queda fuera, recorte de segmentos, MultiLineString, huecos de polígonos, MultiPolygon, contactos sin área, estadísticas con valores ausentes y exclusión de ids. Las exportaciones se comprueban sin mutar los datos originales y el CSV neutraliza etiquetas que podrían interpretarse como fórmulas en una hoja de cálculo.
 
@@ -420,9 +420,11 @@ Para repetir la comprobación de disponibilidad real del buscador y el motor de 
 
 El historial de validación de la entrega debe leerse junto con docs/RUTAS.md y el resumen de comprobaciones que acompaña al proyecto. Las verificaciones de servicios externos son observaciones de disponibilidad, no acuerdos de continuidad. Un resultado desde una terminal tampoco sustituye por sí solo una prueba CORS desde la dirección publicada. La integración MapLibre 6 incluye su worker de módulos como recurso de Vite en MapView.tsx. En ese archivo, DeckCompatibleMap adapta la lectura de elevación que espera deck.gl mediante la API pública getCenterElevation(). Esta adaptación sirve para interleaved: false; cambiar a renderizado intercalado exige revisar la integración.
 
+La selección libre se comprobó en navegador a 1280 por 720 y 390 por 844 píxeles: no muestra resultados con el contorno abierto, permite deshacer, cierra por el primer vértice o por botón y rechaza cruces sin perder el borrador. Las pruebas automáticas cubren triángulos, concavidad, múltiples intervalos de líneas, bordes, huecos de entidades, igualdad con un contorno rectangular y rechazo de geometrías abiertas o inválidas.
+
 ### 15.2 Límites que deben conocerse
 
-Las medidas son geodésicas o esféricas a partir de WGS84 y no incorporan altura. El rectángulo no admite cruzar el antimeridiano ni abarcar más de 180 grados de longitud. La importación comprueba estructura y coordenadas pero no repara toda topología inválida. Si una intersección falla, se notifica; si falla una medición, la métrica se marca como no disponible, sin inventar un cero.
+Las medidas son geodésicas o esféricas a partir de WGS84 y no incorporan altura. La selección no admite cruzar el antimeridiano ni abarcar más de 180 grados de longitud. La importación comprueba estructura y coordenadas pero no repara toda topología inválida. Si una intersección falla, se notifica; si falla una medición, la métrica se marca como no disponible, sin inventar un cero.
 
 Los datos originales y las importaciones se descargan completos, por lo que el tamaño, número de vértices y capacidad del navegador influyen en rendimiento. La opacidad y visibilidad determinan qué vectores entran en el análisis. Las imágenes oficiales aportan contexto cartográfico, no recuentos de entidades. Las áreas superpuestas y segmentos coincidentes se suman por registro.
 

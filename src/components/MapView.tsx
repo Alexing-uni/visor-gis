@@ -7,6 +7,8 @@ import { GeoJsonLayer, BitmapLayer, ScatterplotLayer, TextLayer } from '@deck.gl
 import { TileLayer } from '@deck.gl/geo-layers';
 import { Button, Select, Slider, Switch } from 'antd';
 import type { PickingInfo, Layer as DeckLayer } from '@deck.gl/core';
+import type { Feature, Polygon } from 'geojson';
+import { selectionPolygon } from '../lib/analysis.ts';
 import type { Bounds, Collection, Selection, VectorFeature } from '../types.ts';
 import type { Layer } from '../model/Layer.ts';
 import type { RasterSource } from '../lib/raster.ts';
@@ -21,11 +23,12 @@ class DeckCompatibleMap extends maplibregl.Map {
   get transform() { return { elevation: this.getCenterElevation() }; }
 }
 export type MapHandle = { fit: (bounds: Bounds) => void; fly: (center: [number, number]) => void };
-export type MapMode = 'rectangle' | 'origin' | 'destination' | null;
+export type MapMode = 'rectangle' | 'polygon' | 'origin' | 'destination' | null;
 type Props = {
   layers: Layer[]; rasters: RasterSource[]; onSelection: (selection: Selection | null) => void; onReady: () => void;
   mode: MapMode; interactionId: number; onBounds: (bounds: Bounds) => void; onPoint: (point: [number,number]) => void; onCancel: () => void;
   bounds: Bounds|null; highlighted: Record<string,Collection>; route: RouteResult|null;
+  polygon: Feature<Polygon>|null; onPolygon: (polygon: Feature<Polygon>) => void;
   origin: RouteEndpoint|null; destination: RouteEndpoint|null; children?: React.ReactNode;
 };
 const emptyStyle: StyleSpecification = { version: 8, sources: {}, layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#e8eff4' } }] };
@@ -37,7 +40,7 @@ const styles: Record<string, string | StyleSpecification> = {
 const rectangle = (b:Bounds) => ({type:'Feature' as const,properties:{},geometry:{type:'Polygon' as const,coordinates:[[[b[0],b[1]],[b[2],b[1]],[b[2],b[3]],[b[0],b[3]],[b[0],b[1]]]]}});
 const boundsOf = (a:number[],b:number[]):Bounds=>[Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.max(a[0],b[0]),Math.max(a[1],b[1])];
 export const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
-  const { layers, rasters, onSelection, children, mode, bounds, highlighted, route, origin, destination }=props;
+  const { layers, rasters, onSelection, children, mode, bounds, polygon, highlighted, route, origin, destination }=props;
   const latest=useRef(props);latest.current=props;
   const target = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -51,6 +54,12 @@ export const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref)
   const terrainRef=useRef({enabled:false,exaggeration:1});terrainRef.current={enabled:terrain,exaggeration};
   const [mapError, setMapError] = useState('');
   const [corner,setCorner]=useState<[number,number]|null>(null);const [preview,setPreview]=useState<Bounds|null>(null);
+  const [vertices,setVertices]=useState<[number,number][]>([]);
+  const verticesRef=useRef(vertices);verticesRef.current=vertices;
+  const closePolygon=useCallback(()=>{
+    try { const completed=selectionPolygon(verticesRef.current);setMapError('');latest.current.onPolygon(completed); }
+    catch(error) {setMapError(error instanceof Error?error.message:'No se pudo cerrar el polígono.');}
+  },[]);
   const down=useRef<{x:number;y:number;geo:[number,number]}|null>(null);
   const fit = useCallback((b: Bounds) => {
     initialFit.current = b;
@@ -77,17 +86,26 @@ export const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref)
     viewer.addControl(deck);
     map.current = viewer; overlay.current = deck;setInitialized(true);
     viewer.on('movestart', () => latest.current.onSelection(null));
-    viewer.on('click', event => { if (latest.current.mode === 'origin' || latest.current.mode === 'destination') latest.current.onPoint([event.lngLat.lng,event.lngLat.lat]); });
+    viewer.on('click', event => {
+      if (latest.current.mode === 'origin' || latest.current.mode === 'destination') latest.current.onPoint([event.lngLat.lng,event.lngLat.lat]);
+      if (latest.current.mode === 'polygon') {
+        const points=verticesRef.current;
+        if(points.length>=3) {const first=viewer.project(points[0]);if(Math.hypot(event.point.x-first.x,event.point.y-first.y)<=18){closePolygon();return;}}
+        const point:[number,number]=[event.lngLat.lng,event.lngLat.lat];
+        if(points.length&&points.at(-1)![0]===point[0]&&points.at(-1)![1]===point[1])return;
+        setMapError('');setVertices([...points,point]);
+      }
+    });
     viewer.on('moveend', () => setTilted(viewer.getPitch() > 1));
     viewer.on('load', () => { if (initialFit.current) fit(initialFit.current); latest.current.onReady(); });
     viewer.on('style.load',applyTerrain);
     viewer.on('error', () => setMapError('Algún fondo, relieve o servicio externo no ha cargado. Revisa la conexión o usa Sin fondo y desactiva los servicios.'));
     const resize = new ResizeObserver(() => viewer.resize());resize.observe(target.current);
     return () => { resize.disconnect(); viewer.remove(); map.current = null; overlay.current = null; };
-  }, [fit,applyTerrain]);
+  }, [fit,applyTerrain,closePolygon]);
   useEffect(()=>{applyTerrain();},[terrain,exaggeration,applyTerrain]);
   useEffect(()=>{
-    setCorner(null);setPreview(null);down.current=null;
+    setCorner(null);setPreview(null);setVertices([]);down.current=null;
     if(mode){setTerrain(false);map.current?.jumpTo({pitch:0,bearing:0});latest.current.onSelection(null);}
   },[mode,props.interactionId]);
   useEffect(() => {
@@ -107,11 +125,16 @@ export const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref)
     Object.entries(highlighted).forEach(([id,data])=>all.push(new GeoJsonLayer({id:`selected-${id}`,data,pickable:false,getFillColor:[255,190,30,65],getLineColor:[255,160,0,255],getLineWidth:4,lineWidthUnits:'pixels',getPointRadius:7,pointRadiusUnits:'pixels',parameters:{depthCompare:'always',depthWriteEnabled:false}})));
     const box=preview??bounds;
     if(box)all.push(new GeoJsonLayer({id:'analysis-box',data:rectangle(box),pickable:false,getFillColor:[15,143,149,25],getLineColor:[0,113,123,255],getLineWidth:2,lineWidthUnits:'pixels',parameters:{depthCompare:'always',depthWriteEnabled:false}}));
+    if(polygon)all.push(new GeoJsonLayer({id:'analysis-polygon',data:polygon,pickable:false,getFillColor:[15,143,149,25],getLineColor:[0,113,123,255],getLineWidth:2,lineWidthUnits:'pixels',parameters:{depthCompare:'always',depthWriteEnabled:false}}));
+    if(mode==='polygon') {
+      if(vertices.length>=2)all.push(new GeoJsonLayer({id:'analysis-draft',data:{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:vertices}},pickable:false,getLineColor:[0,113,123,255],getLineWidth:3,lineWidthUnits:'pixels',parameters:{depthCompare:'always'}}));
+      all.push(new ScatterplotLayer({id:'analysis-vertices',data:vertices,getPosition:p=>p,getRadius:8,radiusUnits:'pixels',getFillColor:(_,info)=>info.index===0?[255,180,30,255]:[0,113,123,255],stroked:true,getLineColor:[255,255,255,255],getLineWidth:2,lineWidthUnits:'pixels',pickable:false,parameters:{depthCompare:'always'}}));
+    }
     if(route)all.push(new GeoJsonLayer({id:'route',data:{type:'Feature',properties:{},geometry:route.geometry},getLineColor:[38,99,235],getLineWidth:6,lineWidthUnits:'pixels',pickable:false,parameters:{depthCompare:'always',depthWriteEnabled:false}}));
     const ends=[origin?{position:origin.coordinates,text:'A',color:[16,130,94]}:null,destination?{position:destination.coordinates,text:'B',color:[219,65,60]}:null].filter(x=>x!==null);
     all.push(new ScatterplotLayer({id:'route-endpoints',data:ends,getPosition:d=>d.position,getRadius:13,radiusUnits:'pixels',getFillColor:d=>d.color,pickable:false,parameters:{depthCompare:'always'}}),new TextLayer({id:'route-labels',data:ends,getPosition:d=>d.position,getText:d=>d.text,getSize:14,getColor:[255,255,255],getTextAnchor:'middle',getAlignmentBaseline:'center',pickable:false,parameters:{depthCompare:'always'}}));
     overlay.current?.setProps({ layers:all });
-  }, [layers,rasters,onSelection,highlighted,bounds,preview,route,origin,destination,initialized]);
+  }, [layers,rasters,onSelection,highlighted,bounds,polygon,preview,vertices,mode,route,origin,destination,initialized]);
   const toggleLock = () => {
     const next = !locked; setLocked(next);const viewer = map.current;if (!viewer) return;
     if (next) { viewer.dragRotate.disable(); viewer.touchZoomRotate.disableRotation(); viewer.keyboard.disableRotation(); viewer.easeTo({ bearing: 0 }); }
@@ -126,7 +149,7 @@ export const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref)
       <label className="source-title">Terreno con elevación<Switch checked={terrain} disabled={!!mode} aria-label="Activar relieve" onChange={setTerrain}/></label><label>Exageración vertical {exaggeration.toFixed(1)}×<Slider ariaLabelForHandle="Exageración del relieve" min={0.5} max={3} step={0.1} value={exaggeration} onChange={setExaggeration}/></label><p className="muted">Modelo global Terrarium. La vista 3D inclina la cámara; activa el terreno para añadir elevación. Las capas deck.gl no se ajustan a la superficie del terreno. Analiza y elige puntos en 2D.</p>
     </div></details>
     {mode&&<>{mode==='rectangle'&&<div className="selection-surface" aria-label="Superficie de selección del mapa" onPointerDown={e=>{if(!map.current||!e.isPrimary)return;e.currentTarget.setPointerCapture(e.pointerId);down.current={x:e.clientX,y:e.clientY,geo:geographic(e.clientX,e.clientY)};}} onPointerMove={e=>{if(mode!=='rectangle'||!map.current)return;const start=corner??down.current?.geo;if(start)setPreview(boundsOf(start,geographic(e.clientX,e.clientY)));}} onPointerUp={e=>{if(!e.isPrimary)return;const start=down.current;down.current=null;if(!start||!map.current)return;const end=geographic(e.clientX,e.clientY);if(mode!=='rectangle'){latest.current.onPoint(end);return;}if(Math.hypot(e.clientX-start.x,e.clientY-start.y)>6)complete(boundsOf(corner??start.geo,end));else if(corner)complete(boundsOf(corner,end));else setCorner(end);}} onPointerCancel={()=>{down.current=null;setPreview(null);}}/>}
-      <div className="interaction-banner" role="status"><span>{mode==='rectangle'?(corner?'Ahora marca la esquina opuesta.':'Arrastra un rectángulo o toca dos esquinas.'):`Toca el mapa para fijar ${mode==='origin'?'el origen A':'el destino B'}.`}</span><Button onClick={props.onCancel}>Cancelar</Button></div></>}
+      <div className="interaction-banner" role="status"><span>{mode==='rectangle'?(corner?'Ahora marca la esquina opuesta.':'Arrastra un rectángulo o toca dos esquinas.'):mode==='polygon'?`${vertices.length} vértices · Marca puntos; toca el primero o pulsa Cerrar y analizar. Sin resultados hasta cerrar.`:`Toca el mapa para fijar ${mode==='origin'?'el origen A':'el destino B'}.`}</span><div className="interaction-actions">{mode==='polygon'&&<><Button disabled={!vertices.length} onClick={()=>{setVertices(points=>points.slice(0,-1));setMapError('');}}>Deshacer punto</Button><Button type="primary" disabled={vertices.length<3} onClick={closePolygon}>Cerrar y analizar</Button></>}<Button onClick={props.onCancel}>Cancelar</Button></div></div></>}
     {mapError && <div className="map-error" role="alert">{mapError}<button aria-label="Cerrar aviso del mapa" onClick={()=>setMapError('')}>×</button></div>}
     <div className="raster-attributions">{rasters.filter(r=>r.visible).map(r=><span key={r.id}>{r.attribution}</span>)}</div>
     {children}

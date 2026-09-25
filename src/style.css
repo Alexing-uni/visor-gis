@@ -67,3 +67,5 @@ html,body,#root{height:100%;width:100%;overflow:hidden}body{color:#193b42;backgr
 @media(max-height:480px) and (min-width:801px){.sidebar header{padding:10px 18px}.sidebar header p,.eyebrow{display:none}.rail{padding-top:0;gap:0}.brand{font-size:22px;padding:3px}.rail button{min-height:50px}.nav-icon{font-size:20px;line-height:24px}}
 .import-panel{padding:5px 18px 24px;font-size:13px;line-height:1.65}.import-panel>label{display:block;margin:14px 0}.import-panel input[type=file]{width:100%;display:block;font-size:12px;margin-top:6px}.import-panel .tool-note{font-size:12px;color:#647c75}.import-panel .ant-alert{margin-top:12px}
 
+.interaction-banner{flex-wrap:wrap}.interaction-banner>span{flex:1;min-width:180px}.interaction-actions{display:flex;gap:7px;flex-wrap:wrap}.interaction-actions .ant-btn{min-height:36px}
+.interaction-actions .ant-btn:disabled{color:#b7cdc6;background:#254d48;border-color:#6d8c84}

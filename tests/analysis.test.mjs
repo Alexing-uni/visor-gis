@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { area, bboxPolygon, distance } from '@turf/turf';
-import { analyzeLayers, buildAnalysisCsv, buildAnalysisJson, clippedLineLengthKm, isIdentifierAttribute, selectedGeoJson } from '../src/lib/analysis.ts';
+import { analyzeLayers, buildAnalysisCsv, buildAnalysisJson, clippedLineLengthKm, isIdentifierAttribute, selectedGeoJson, selectionPolygon } from '../src/lib/analysis.ts';
 
 const feature = (type, coordinates, properties = {}) => ({ type: 'Feature', properties, geometry: { type, coordinates } });
 const layer = (id, features, extra = {}) => ({ id, name: id, config: { visible: true, opacity: 1, ...extra }, data: { type: 'FeatureCollection', features } });
@@ -116,4 +116,54 @@ test('Magnitudes no aditivas y campos auxiliares no generan estadísticas engañ
   assert.equal(stats.find(s=>s.attribute==='Pend_1').mean,30);
   assert.equal(stats.find(s=>s.attribute==='apportionmentConfidence').sum,null);
   assert.ok(!stats.some(s=>['left','row_index','Riesgo'].includes(s.attribute)));
+});
+
+test('Selección libre: triángulo usa el contorno real, conserva Multi y exporta su geometría', () => {
+  const polygon=selectionPolygon([[0,0],[2,0],[0,2]]);
+  const result=analyzeLayers([layer('p',[
+    feature('Point',[0.25,0.25],{cantidad:10}),feature('Point',[1.5,1.5],{cantidad:999}),
+    feature('MultiPoint',[[1,1],[3,3]],{cantidad:20})
+  ])],polygon);
+  assert.equal(result.totalCount,2);
+  assert.equal(result.layers[0].numericStats[0].sum,30);
+  close(result.areaM2,area(polygon));
+  const exported=JSON.parse(buildAnalysisJson(result));
+  assert.equal(exported.selectionKind,'polygon');
+  assert.deepEqual(exported.selection.geometry,polygon.geometry);
+});
+
+test('Selección libre cóncava: suma tramos interiores separados y bordes, sin medir el hueco exterior', () => {
+  const polygon=selectionPolygon([[0,0],[3,0],[3,3],[2,3],[2,1],[1,1],[1,3],[0,3]]);
+  const result=analyzeLayers([layer('l',[
+    feature('MultiLineString',[[[-1,2],[4,2]],[[-1,0],[4,0]]]),
+    feature('LineString',[[1.2,2],[1.8,2]]),
+    feature('LineString',[[-1,3],[0,3]])
+  ])],polygon);
+  assert.equal(result.totalCount,2);
+  close(result.lineLengthKm,distance([0,2],[1,2])+distance([2,2],[3,2])+distance([0,0],[3,0]));
+  assert.deepEqual(result.warnings,[]);
+});
+
+test('Selección libre: recorta superficies al triángulo y conserva huecos de las entidades', () => {
+  const polygon=selectionPolygon([[0,0],[4,0],[0,4]]);
+  const hole=ring(0.5,0.5,1,1).reverse();
+  const result=analyzeLayers([layer('a',[feature('Polygon',[ring(-1,-1,5,5),hole])])],polygon);
+  close(result.polygonAreaKm2,(area(polygon)-area(feature('Polygon',[hole])))/1e6,1e-7);
+  assert.equal(result.totalCount,1);
+});
+
+test('El mismo contorno rectangular produce iguales recuentos, estadísticas y medidas en modo libre', () => {
+  const layers=[layer('a',[feature('Point',[1,1],{cantidad:7}),feature('LineString',[[-1,1],[3,1]]),feature('Polygon',[ring(1,1,3,3)])])];
+  const rectangular=analyzeLayers(layers,[0,0,2,2]);
+  const free=analyzeLayers(layers,selectionPolygon(ring(0,0,2,2)));
+  assert.equal(rectangular.totalCount,free.totalCount);
+  assert.deepEqual(rectangular.layers,free.layers);
+  close(rectangular.areaM2,free.areaM2);
+});
+
+test('Selección libre rechaza contornos abiertos, cruces, repetidos, puntos alineados y antimeridiano', () => {
+  assert.throws(()=>analyzeLayers([],feature('Polygon',[[[0,0],[1,0],[0,1]]])),/Cierra/);
+  for(const points of [ [[0,0],[1,0]], [[0,0],[2,2],[0,2],[2,0]], [[0,0],[1,1],[2,2]], [[0,0],[1,0],[1,1],[1,0]], [[-179,0],[179,0],[179,1]], [[0,0],[NaN,1],[1,1]] ]) {
+    assert.throws(()=>selectionPolygon(points));
+  }
 });

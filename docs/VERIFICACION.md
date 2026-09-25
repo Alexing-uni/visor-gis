@@ -9,7 +9,7 @@ La publicación se realiza en `Alexing-uni/visor-gis` mediante Git y el workflow
 ## Comprobaciones realizadas
 
 - Instalación mediante `npm.cmd ci`; dependencias fijadas en `package-lock.json`.
-- `npm.cmd test`: 37 pruebas superadas. Incluyen geometrías reales y múltiples, recorte de líneas/polígonos, huecos, contactos en bordes, estadísticas, exportación CSV, CRS, API y SQLite, migraciones, rutas, importación, transacciones IndexedDB y errores/reintentos ráster.
+- `npm.cmd test`: 42 pruebas superadas. Incluyen geometrías reales y múltiples, recorte de líneas/polígonos, huecos, contactos en bordes, estadísticas, exportación CSV, CRS, API y SQLite, migraciones, rutas, importación, transacciones IndexedDB y errores/reintentos ráster.
 - Compilación TypeScript y producción local; compilación estática con `VITE_BASE_PATH=/visor-gis/` y vista previa bajo esa subruta.
 - Navegador: carga de 9.999 puntos, 6.233 líneas y 399 polígonos; encuadre, selección por arrastre y por dos esquinas, resultados y resaltado. Revisión visual a 1280×720, 1024×768 y 390×844.
 - Importación real del ejemplo GeoJSON desde una URL: cuatro entidades separadas en tres capas y recuperadas después de recargar la página, usando IndexedDB del navegador.
@@ -17,6 +17,8 @@ La publicación se realiza en `Alexing-uni/visor-gis` mediante Git y el workflow
 - Ruta real Oviedo–Gijón desde buscador, distancia, duración e indicaciones; intercambio elimina el resultado antiguo. Elección en mapa distingue arrastre de pulsación.
 - Photon y OSRM en red: respuesta válida y rechazo de un punto oceánico. Detalles y cifras reproducibles en [RUTAS.md](RUTAS.md) y [routing-check.json](routing-check.json).
 - Diez comprobaciones HTTP de fuentes, incluyendo WMS PNOA e hidrografía, capacidades, imágenes, CORS, relieve y recursos del mapa base. Resultados en [FUENTES.md](FUENTES.md) y [sources-check.json](sources-check.json). Ortofoto e hidrografía también revisadas visualmente en el navegador.
+
+- Selección libre verificada en navegador de escritorio y tamaño móvil: sin resultados antes de cerrar, cierre por primer punto o botón, deshacer, rechazo de cruces y retorno al rectángulo. Cinco nuevas pruebas cubren contornos reales, concavidad, líneas, superficies, exportación y validación.
 
 ## Correcciones durante la comprobación
 

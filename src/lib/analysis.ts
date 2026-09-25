@@ -1,4 +1,4 @@
-import { area, bbox, bboxPolygon, booleanIntersects, distance, featureCollection, intersect } from '@turf/turf';
+import { area, bbox, bboxPolygon, booleanIntersects, booleanPointInPolygon, distance, featureCollection, intersect, kinks } from '@turf/turf';
 import type { Feature, LineString, MultiLineString, MultiPolygon, Polygon, Position } from 'geojson';
 import type { Layer } from '../model/Layer.ts';
 import type { Bounds, Collection, Kind, VectorFeature } from '../types.ts';
@@ -17,7 +17,8 @@ export type LayerAnalysis = {
 };
 export type AnalysisResult = {
   bounds: Bounds;
-  rectangle: Feature<Polygon>;
+  selection: Feature<Polygon>;
+  selectionKind: 'rectangle' | 'polygon';
   areaM2: number;
   areaKm2: number;
   areaHa: number;
@@ -31,7 +32,7 @@ export type AnalysisResult = {
   warnings: string[];
 };
 
-export const ANALYSIS_CRITERION = 'Intersección de la geometría real con el rectángulo, incluido su borde. Cada Feature se cuenta una vez; las geometrías Multi cuentan como una entidad. Solo se analizan las capas vectoriales visibles con opacidad mayor que cero.';
+export const ANALYSIS_CRITERION = 'Intersección de la geometría real con la selección cerrada (rectángulo o polígono libre), incluido su borde. Cada Feature se cuenta una vez; las geometrías Multi cuentan como una entidad. Solo se analizan las capas vectoriales visibles con opacidad mayor que cero.';
 const emptyCounts = (): GeometryCounts => ({ point: 0, line: 0, polygon: 0 });
 const geometryKind = (feature: VectorFeature): Kind => /Point$/.test(feature.geometry.type) ? 'point' : /LineString$/.test(feature.geometry.type) ? 'line' : 'polygon';
 
@@ -48,6 +49,54 @@ export function selectionRectangle(bounds: Bounds): Feature<Polygon> {
   }
   if (east - west > 180) throw new Error('La selección no puede cruzar el antimeridiano ni abarcar más de 180° de longitud.');
   return bboxPolygon(bounds);
+}
+
+/** Called only on explicit closure: an unfinished ring is never an analysis area. */
+export function selectionPolygon(vertices: Position[]): Feature<Polygon> {
+  const points = vertices.map(p => [p[0], p[1]]);
+  if (points.length > 1 && points[0][0] === points.at(-1)![0] && points[0][1] === points.at(-1)![1]) points.pop();
+  if (points.length < 3 || new Set(points.map(p => p.join(','))).size !== points.length) throw new Error('Marca al menos tres vértices distintos, sin repetir puntos, antes de cerrar.');
+  if (points.some(p => !p.every(Number.isFinite) || Math.abs(p[0]) > 180 || Math.abs(p[1]) > 90)) throw new Error('El polígono contiene coordenadas no válidas.');
+  const polygon: Feature<Polygon> = { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [[...points, [...points[0]]]] } };
+  const extent = bbox(polygon) as Bounds;
+  selectionRectangle(extent); // Same coordinate/antimeridian constraints as rectangles.
+  if (kinks(polygon).features.length) throw new Error('Los lados del polígono se cruzan. Deshaz los últimos puntos y vuelve a cerrarlo.');
+  const [ox,oy] = points[0];
+  const planarArea = points.reduce((sum,p,i)=>{const q=points[(i+1)%points.length];return sum+(p[0]-ox)*(q[1]-oy)-(q[0]-ox)*(p[1]-oy);},0);
+  const scale = Math.max(extent[2]-extent[0],extent[3]-extent[1]);
+  if (Math.abs(planarArea) <= Number.EPSILON*scale*scale*points.length) throw new Error('El polígono necesita una superficie mayor que cero; los puntos no pueden estar alineados.');
+  if (area(polygon) <= 0) throw new Error('El polígono necesita una superficie mayor que cero; los puntos no pueden estar alineados.');
+  return polygon;
+}
+
+/** Split a segment at every ring crossing, then measure only interior/border intervals.
+ * Handles concave selections, multiple entries and collinear boundary segments. */
+function lineLengthInPolygon(geometry: LineString | MultiLineString, polygon: Feature<Polygon>): number {
+  const lines = geometry.type === 'LineString' ? [geometry.coordinates] : geometry.coordinates;
+  const ring = polygon.geometry.coordinates[0];
+  const cross = (ax:number, ay:number, bx:number, by:number) => ax * by - ay * bx;
+  let total = 0;
+  for (const line of lines) for (let i = 1; i < line.length; i++) {
+    const a = line[i - 1], b = line[i], dx = b[0] - a[0], dy = b[1] - a[1];
+    if (dx === 0 && dy === 0) continue;
+    const cuts = [0, 1], at = (t:number):Position => [a[0] + dx*t, a[1] + dy*t];
+    for (let j = 1; j < ring.length; j++) {
+      const c = ring[j - 1], d = ring[j], ex = d[0]-c[0], ey = d[1]-c[1], qx = c[0]-a[0], qy = c[1]-a[1];
+      const denominator = cross(dx,dy,ex,ey);
+      if (denominator !== 0) {
+        const t = cross(qx,qy,ex,ey)/denominator, u = cross(qx,qy,dx,dy)/denominator;
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) cuts.push(t);
+      } else if (cross(qx,qy,dx,dy) === 0) {
+        for (const p of [c,d]) { const t = Math.abs(dx) >= Math.abs(dy) ? (p[0]-a[0])/dx : (p[1]-a[1])/dy; if (t > 0 && t < 1) cuts.push(t); }
+      }
+    }
+    const ordered = [...new Set(cuts)].sort((x,y)=>x-y);
+    for (let j = 1; j < ordered.length; j++) {
+      const start = ordered[j-1], end = ordered[j];
+      if (booleanPointInPolygon(at((start+end)/2),polygon)) total += distance(at(start),at(end),{units:'kilometers'});
+    }
+  }
+  return total;
 }
 
 /** Liang–Barsky clips the actual segment, not its bounding box. GeoJSON edges are
@@ -108,11 +157,18 @@ function collectStats(features: VectorFeature[]): { numericStats: NumericStats[]
   return { numericStats, excludedNumericAttributes: [...excluded].sort() };
 }
 
-export function analyzeLayers(layers: Layer[], bounds: Bounds): AnalysisResult {
-  const rectangle = selectionRectangle(bounds);
-  const areaM2 = area(rectangle);
+export function analyzeLayers(layers: Layer[], input: Bounds | Feature<Polygon>): AnalysisResult {
+  if (!Array.isArray(input) && (input.geometry.type !== 'Polygon' || input.geometry.coordinates.length !== 1)) throw new Error('La selección libre debe ser un polígono de un solo contorno.');
+  if (!Array.isArray(input)) {
+    const ring = input.geometry.coordinates[0];
+    if (ring.length < 4 || ring[0][0] !== ring.at(-1)![0] || ring[0][1] !== ring.at(-1)![1]) throw new Error('Cierra el polígono antes de calcular los resultados.');
+  }
+  const isRectangle = Array.isArray(input);
+  const selection = isRectangle ? selectionRectangle(input) : selectionPolygon(input.geometry.coordinates[0]);
+  const bounds = bbox(selection) as Bounds;
+  const areaM2 = area(selection);
   const result: AnalysisResult = {
-    bounds: [...bounds], rectangle, areaM2, areaKm2: areaM2 / 1e6, areaHa: areaM2 / 1e4,
+    bounds: [...bounds], selection, selectionKind: isRectangle ? 'rectangle' : 'polygon', areaM2, areaKm2: areaM2 / 1e6, areaHa: areaM2 / 1e4,
     totalCount: 0, counts: emptyCounts(), lineLengthKm: 0, polygonAreaKm2: 0,
     layers: [], selectedByLayer: Object.create(null) as Record<string, Collection>, hiddenLayerCount: 0, warnings: [],
   };
@@ -125,7 +181,7 @@ export function analyzeLayers(layers: Layer[], bounds: Bounds): AnalysisResult {
       try {
         const extent = bbox(feature);
         if (extent[2] < bounds[0] || extent[0] > bounds[2] || extent[3] < bounds[1] || extent[1] > bounds[3]) continue;
-        if (!booleanIntersects(feature, rectangle)) continue;
+        if (!booleanIntersects(feature, selection)) continue;
       } catch (error) {
         result.warnings.push(`${layer.name}, entidad ${index + 1}: no se pudo comprobar la intersección (${error instanceof Error ? error.message : String(error)}).`);
         continue;
@@ -135,11 +191,12 @@ export function analyzeLayers(layers: Layer[], bounds: Bounds): AnalysisResult {
       summary.counts[kind]++;
       try {
         if (kind === 'line') {
-          const length = clippedLineLengthKm(feature.geometry as LineString | MultiLineString, bounds);
+          const geometry = feature.geometry as LineString | MultiLineString;
+          const length = isRectangle ? clippedLineLengthKm(geometry, bounds) : lineLengthInPolygon(geometry, selection);
           if (!Number.isFinite(length)) throw new Error('Longitud no finita');
           if (summary.lineLengthKm !== null) summary.lineLengthKm += length;
         } else if (kind === 'polygon') {
-          const clipped = intersect(featureCollection<Polygon | MultiPolygon>([feature as Feature<Polygon | MultiPolygon>, rectangle]));
+          const clipped = intersect(featureCollection<Polygon | MultiPolygon>([feature as Feature<Polygon | MultiPolygon>, selection]));
           const clippedArea = clipped ? area(clipped) / 1e6 : 0;
           if (!Number.isFinite(clippedArea)) throw new Error('Superficie no finita');
           if (summary.polygonAreaKm2 !== null) summary.polygonAreaKm2 += clippedArea;
@@ -163,7 +220,7 @@ export function analyzeLayers(layers: Layer[], bounds: Bounds): AnalysisResult {
 }
 
 export function buildAnalysisJson(result: AnalysisResult): string {
-  const { selectedByLayer: _selected, rectangle: _rectangle, ...summary } = result;
+  const { selectedByLayer: _selected, ...summary } = result;
   return JSON.stringify({ criterion: ANALYSIS_CRITERION, measurement: 'Geometrías recortadas; distancia geodésica y superficie esférica WGS84. Z ignorada. Las superficies y longitudes de entidades superpuestas se suman, no se disuelven.', attributeStatistics: 'Atributos completos de las entidades seleccionadas, sin prorratear. Solo números finitos, excluidos identificadores/códigos por nombre. La suma solo es interpretable para atributos aditivos.', ...summary }, null, 2);
 }
 
