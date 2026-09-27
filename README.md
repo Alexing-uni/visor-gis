@@ -1,8 +1,8 @@
-# Visor GIS web
+# Visor GIS web 1.0
 
 Una aplicación para ver datos geográficos, analizar una zona y calcular rutas en coche. Está hecha con React, TypeScript, deck.gl y MapLibre.
 
-**[Abrir el visor](https://alexing-uni.github.io/visor-gis/)** · [Informe Word](docs/Visor_GIS_0.4.docx) · [Informe en texto](docs/MEMORIA.md)
+**[Abrir el visor](https://alexing-uni.github.io/visor-gis/)** · [Informe Word](docs/Visor_GIS_1.0.docx) · [Informe en texto](docs/MEMORIA.md)
 
 ## Qué puedes hacer
 

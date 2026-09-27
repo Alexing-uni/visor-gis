@@ -1,6 +1,6 @@
 # Pruebas y limitaciones
 
-Estas comprobaciones corresponden a la versión 0.4 revisada en septiembre de 2026. La simplificación de la documentación no modifica la aplicación.
+Estas comprobaciones corresponden a la versión 0.4 revisada en septiembre de 2026. La versión 1.0 conserva esas funciones y pruebas; actualiza la identificación de versión y la limpieza del historial de despliegues.
 
 ## Comprobado
 

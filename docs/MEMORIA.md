@@ -1,4 +1,4 @@
-# Visor GIS web · versión 0.4
+# Visor GIS web · versión 1.0
 
 Informe resumido
 

@@ -50,3 +50,7 @@ Revisa los archivos antes de hacer el commit. No subas contraseñas ni datos pri
 `npm.cmd run dev:static` permite probar la modalidad sin servidor. La configuración está en `.env.static`; usa `VITE_STORAGE_MODE=browser`. El modo local normal sigue disponible con `npm.cmd run dev`.
 
 Si borras los datos del sitio en el navegador, se pierden sus ajustes e importaciones. Una base compartida o cuentas de usuario necesitarían un backend alojado por separado.
+
+## Un único registro de despliegue
+
+Después de publicar correctamente, el workflow elimina los registros anteriores del entorno `github-pages` y conserva el nuevo. No borra commits ni ejecuciones de Actions. Si una publicación falla, conserva la anterior. Durante el proceso pueden aparecer temporalmente dos registros.
