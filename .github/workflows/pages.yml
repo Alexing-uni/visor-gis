@@ -40,7 +40,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      deployments: write
       pages: write
       id-token: write
     environment:
@@ -51,6 +50,13 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+  cleanup:
+    name: Limpiar despliegues anteriores
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    steps:
       - name: Conservar solo el despliegue publicado
         uses: actions/github-script@v7
         with:
