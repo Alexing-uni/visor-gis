@@ -1,39 +1,32 @@
-# Datos del tutor y tratamiento espacial
+# Datos e importación
 
-Origen: archivos del ZIP GIS_Proyectin.zip suministrado por el usuario. El PDF incluido coincide byte por byte con la guía revisada previamente.
+## Datos incluidos
 
-| Archivo | Entidades | Geometría | CRS declarado | Zona |
-| --- | ---: | --- | --- | --- |
-| Point 2.geojson | 9.999 | Point, XY | EPSG:31994 | Chile |
-| Polygon 2.geojson | 399 | Polygon, XY | OGC:CRS84 | Chile |
-| Polyline2 1.geojson | 6.233 | MultiLineString, XYZ | EPSG:4258 | Asturias, España |
+Los archivos originales se conservan en `public/data/`:
 
-Los nombres de destino son los que ya utiliza la API. El contenido de cada archivo se conserva exactamente. La transformación se realiza sobre una nueva colección en memoria; no se reescriben los originales.
+| Archivo | Contenido | Registros | Coordenadas de origen |
+| --- | --- | --- | --- |
+| `points.geojson` | Puntos de Chile | 9.999 | EPSG:31994 |
+| `lines.geojson` | Viales de Asturias | 6.233 | EPSG:4258 |
+| `polygons.geojson` | Geología de Chile | 399 | EPSG:4326 |
 
-## Extensión tras normalizar
+Son los datos recibidos con el proyecto anterior. Estos nombres no acreditan por sí solos una licencia de redistribución. `example-import.geojson` contiene cuatro entidades ficticias para practicar.
 
-Formato: [oeste, sur, este, norte], en grados.
+## Importar
 
-- Puntos: [-73.02543635, -40.11667734, -72.42921075, -39.64873933].
-- Polígonos: [-73.72300428, -40.67044155, -71.50559958, -39.01764773].
-- Líneas: [-5.89337700, 43.32904700, -5.80209896, 43.39764500].
+En el panel de importación, elige un archivo GeoJSON o su enlace directo. El límite es 30 MiB. Se admiten puntos, líneas y polígonos, también múltiples; las colecciones mixtas se separan por tipo. Los sistemas de coordenadas admitidos son EPSG:4326, 4258, 3857 y 31994.
 
-La separación entre Chile y Asturias es real en estos archivos. No se deben desplazar ni cambiar artificialmente sus coordenadas para hacerlos coincidir. El visor abre encuadrando los puntos; el botón Encuadrar de Viales lleva a Asturias.
+Una página con un visor no es un GeoJSON. Un WMS sirve imágenes y se añade como fuente de mapa. Los WMTS requieren una plantilla compatible; no se interpreta automáticamente cualquier servicio. Shapefile, KML y GeometryCollection necesitan conversión previa, por ejemplo con QGIS.
 
-## Transformación
+Si un enlace falla, comprueba que devuelve datos, usa HTTPS y permite acceso desde otro sitio (CORS). Descargar el archivo e importarlo localmente puede resolver un bloqueo CORS.
 
-Se registran explícitamente EPSG:31994 (SIRGAS 1995 / UTM 19S) y EPSG:4258 (ETRS89). La transformación de datum con parámetros nulos es una aproximación orientada a visualización, no una operación geodésica de precisión. Para trabajo topográfico, el tutor debe confirmar la transformación y precisión requeridas.
+## Añadir una capa permanente
 
-El CRS84 de los polígonos representa WGS84 con orden longitud–latitud. Se trata como compatible con las coordenadas EPSG:4326 usadas por el visor, sin invertir ejes. La Z de las líneas se conserva; no se transforma su referencia vertical. No se añade un modelo de elevación del terreno.
+1. Copia el GeoJSON a `public/data/`.
+2. Copia una entrada de `src/config/defaultLayers.ts` y cambia identificador, nombre, archivo, tipo, coordenadas y estilo.
+3. Añade su equivalente a `server/database.js` para nuevas instalaciones locales.
+4. Ajusta los atributos mostrados en `src/model/` si lo necesitas.
 
-Se valida la estructura, el tipo de geometría esperado, la finitud de las coordenadas, el cierre de los anillos y la coherencia entre CRS declarado y configurado. No se analiza aquí la topología completa (por ejemplo, autointersecciones).
+Una base SQLite existente conserva su configuración: cambiar los valores iniciales no la actualiza automáticamente. Prepara una migración si quieres modificarla sin perder ajustes.
 
-Los campos Pend_1 y Orient_1 se muestran como valores originales: no se asumen unidades ni se recalculan. Los demás atributos también se conservan y cada modelo define los que muestra el popup.
-
-## Integridad
-
-| Nombre recibido | Destino | SHA-256 |
-| --- | --- | --- |
-| `Point 2.geojson` | `public/data/points.geojson` | `40df5aaf9b8c6a5406555d4f508a6f69707c631886f5390259914f379c6734d0` |
-| `Polygon 2.geojson` | `public/data/polygons.geojson` | `ea8150e73e0071565462c1471af824a735ea66151a75128f3af1c3eca220b3bc` |
-| `Polyline2 1.geojson` | `public/data/lines.geojson` | `7950b96fb89cdbdcc676ce75df7d78479b2c60a95b3efcc66d991f8a2b084363` |
+Las importaciones se guardan en el navegador, no se suben al servidor ni al repositorio. Exporta una copia si quieres conservarlas fuera de ese navegador.

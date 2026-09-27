@@ -135,7 +135,7 @@ def configure(document):
     footer._p.append(field)
     document.settings.element.append(node('w:updateFields', **{'w:val': 'true'}))
     document.core_properties.title = 'Visor GIS web versión 0.4'
-    document.core_properties.subject = 'Memoria técnica y manual de uso'
+    document.core_properties.subject = 'Informe resumido del visor GIS'
     document.core_properties.author = 'Proyecto Visor GIS'
     document.core_properties.keywords = 'GIS, deck.gl, MapLibre, React, análisis, rutas, GitHub Pages'
     document.core_properties.comments = ''
@@ -201,7 +201,7 @@ def add_toc(document, headings):
         prefix = re.match(r'([\d.]+)', heading)[1]
         hyperlink(current, heading, 'sec_' + prefix.replace('.', '_'), internal=True)
     current.add_run()._r.append(node('w:fldChar', **{'w:fldCharType': 'end'}))
-    note = document.add_paragraph('El índice enlaza con los apartados. En Word, haz clic derecho sobre él y elige Actualizar campo y Actualizar toda la tabla para incorporar la paginación. Los títulos conservan sus estilos y numeración automática.')
+    note = document.add_paragraph('En Word: clic derecho en el índice → Actualizar campo → Actualizar toda la tabla.')
     for run in note.runs:
         run.font.size = Pt(9.5)
 
@@ -258,11 +258,10 @@ def build(source: Path, output: Path):
     document.add_paragraph(lines[0].removeprefix('# '), 'Title')
     for line in lines[1:first_section]:
         if line.strip():
-            if line == 'Memoria técnica y manual de uso':
+            if line == 'Informe resumido':
                 document.add_paragraph(line, 'Subtitle')
             else:
                 inline(document.add_paragraph(), line)
-    document.add_page_break()
     add_toc(document, headings)
     document.add_page_break()
     index = first_section
@@ -311,10 +310,12 @@ def build(source: Path, output: Path):
     document.save(output)
     verify = Document(output)
     sections = [p.text for p in verify.paragraphs if p.style.name == 'Heading 1']
-    if len(sections) != 15:
-        raise RuntimeError(f'Expected 15 main sections, found {len(sections)}')
-    if len(verify.tables) != 4:
-        raise RuntimeError(f'Expected 4 tables, found {len(verify.tables)}')
+    expected_sections = sum(level == 1 for level, _ in headings)
+    expected_tables = len(re.findall(r'^\|[ \t:|-]+\|[ \t]*$', text, re.MULTILINE))
+    if len(sections) != expected_sections:
+        raise RuntimeError(f'Expected {expected_sections} main sections, found {len(sections)}')
+    if len(verify.tables) != expected_tables:
+        raise RuntimeError(f'Expected {expected_tables} tables, found {len(verify.tables)}')
     print(f'Created {output}; {len(sections)} numbered sections, {len(verify.tables)} tables; TOC, bookmarks and PAGE field present.')
     print('Structural verification passed. Visual verification requires rendering the DOCX in a compatible office renderer.')
 
