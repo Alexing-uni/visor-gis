@@ -6,8 +6,8 @@ La aplicación tiene una interfaz en el navegador y un servidor opcional para el
 | --- | --- |
 | `src/App.tsx` | Conecta los paneles y el estado de la aplicación. |
 | `src/components/MapView.tsx` | Dibuja el mapa, las capas y las selecciones. |
-| `src/components/` | Paneles de capas, análisis, rutas y fuentes. |
-| `src/lib/` | Cálculos geográficos, rutas, importación y almacenamiento. |
+| `src/components/` | Paneles de capas, análisis, rutas, alcance, importación y fuentes. |
+| `src/lib/` | Cálculos geográficos, rutas, alcance, alturas, importación y almacenamiento. |
 | `src/model/` | Tipos de capas y atributos que se muestran. |
 | `src/hooks/useLayers.ts` | Carga las capas y guarda sus ajustes. |
 | `src/config/defaultLayers.ts` | Capas iniciales del modo estático. |
@@ -18,7 +18,7 @@ La aplicación tiene una interfaz en el navegador y un servidor opcional para el
 
 ## Recorrido de los datos
 
-El visor lee la configuración, carga el GeoJSON y transforma las coordenadas cuando hace falta. deck.gl dibuja las entidades sobre el mapa base de MapLibre. Al seleccionar una zona, Turf calcula las intersecciones y el panel muestra los resultados.
+El visor lee la configuración, carga el GeoJSON y transforma las coordenadas cuando hace falta. En 2D, deck.gl dibuja sobre MapLibre. En 3D, deck.gl dibuja tanto el terreno como las capas adaptadas a él; MapLibre conserva la cámara. Al seleccionar una zona, Turf calcula las intersecciones y el panel muestra los resultados.
 
 En local, Express y SQLite guardan la configuración de las capas originales; sus geometrías siguen en archivos. En Pages, esa configuración se guarda en IndexedDB, dentro del navegador. Las importaciones también se guardan allí en ambos modos. Las preferencias de imágenes usan localStorage.
 

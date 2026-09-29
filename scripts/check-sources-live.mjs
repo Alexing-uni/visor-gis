@@ -6,7 +6,7 @@ import { officialSources, tileUrl } from '../src/lib/raster.ts';
 const origin = 'https://example.github.io';
 const checks = [];
 const bounds = [-5.86, 43.35, -5.81, 43.39];
-const headers = { Origin: origin, 'User-Agent': 'VisorGIS/0.4 manual-source-check' };
+const headers = { Origin: origin, 'User-Agent': 'VisorGIS/1.1 manual-source-check' };
 
 async function check(name, url, format) {
   const result = { name, url, format, date: new Date().toISOString(), ok: false };

@@ -69,3 +69,6 @@ html,body,#root{height:100%;width:100%;overflow:hidden}body{color:#193b42;backgr
 
 .interaction-banner{flex-wrap:wrap}.interaction-banner>span{flex:1;min-width:180px}.interaction-actions{display:flex;gap:7px;flex-wrap:wrap}.interaction-actions .ant-btn{min-height:36px}
 .interaction-actions .ant-btn:disabled{color:#b7cdc6;background:#254d48;border-color:#6d8c84}
+
+/* Keep source roles and map settings usable on narrow and short screens. */
+.source-card>label{display:block;margin-top:10px}.source-card>label>.ant-select{display:block;width:100%;margin-top:6px}.map-settings[open]{max-height:calc(100% - 95px);overflow:auto}

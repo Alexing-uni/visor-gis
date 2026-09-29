@@ -1,4 +1,4 @@
-"""Rebuild docs/Visor_GIS_1.0.docx from docs/MEMORIA.md using python-docx.
+"""Rebuild docs/Visor_GIS_1.1.docx from docs/MEMORIA.md using python-docx.
 
 Run with a Python environment that includes python-docx:
   python scripts/generate-docx.py
@@ -126,7 +126,7 @@ def configure(document):
         toc.font.bold = level == 1
     footer = section.footer.paragraphs[0]
     footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = footer.add_run('Visor GIS 1.0  |  ')
+    run = footer.add_run('Visor GIS 1.1  |  ')
     run.font.size = Pt(9)
     field = node('w:fldSimple', **{'w:instr': 'PAGE'})
     field.append(node('w:r'))
@@ -134,7 +134,7 @@ def configure(document):
     field[0][0].text = '1'
     footer._p.append(field)
     document.settings.element.append(node('w:updateFields', **{'w:val': 'true'}))
-    document.core_properties.title = 'Visor GIS web versión 1.0'
+    document.core_properties.title = 'Visor GIS web versión 1.1'
     document.core_properties.subject = 'Informe resumido del visor GIS'
     document.core_properties.author = 'Proyecto Visor GIS'
     document.core_properties.keywords = 'GIS, deck.gl, MapLibre, React, análisis, rutas, GitHub Pages'
@@ -248,7 +248,7 @@ def add_table(document, rows):
 
 
 def build(source: Path, output: Path):
-    text = source.read_text(encoding='utf-8')
+    text = source.read_text(encoding='utf-8-sig')
     lines = text.splitlines()
     headings = [(len(match[1]) - 1, match[2]) for line in lines if (match := re.match(r'^(#{2,3})\s+(.+)$', line))]
     document = Document()
@@ -258,7 +258,7 @@ def build(source: Path, output: Path):
     document.add_paragraph(lines[0].removeprefix('# '), 'Title')
     for line in lines[1:first_section]:
         if line.strip():
-            if line == 'Informe resumido':
+            if line.startswith('Informe resumido'):
                 document.add_paragraph(line, 'Subtitle')
             else:
                 inline(document.add_paragraph(), line)
@@ -323,6 +323,6 @@ def build(source: Path, output: Path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--source', type=Path, default=ROOT / 'docs' / 'MEMORIA.md')
-    parser.add_argument('--output', type=Path, default=ROOT / 'docs' / 'Visor_GIS_1.0.docx')
+    parser.add_argument('--output', type=Path, default=ROOT / 'docs' / 'Visor_GIS_1.1.docx')
     arguments = parser.parse_args()
     build(arguments.source, arguments.output)

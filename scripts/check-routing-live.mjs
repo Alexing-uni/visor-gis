@@ -4,7 +4,7 @@ import { writeFile } from 'node:fs/promises';
 
 const requests = [];
 const client = createRoutingClient({ fetcher: async (url, init) => {
-  const response = await fetch(url, { ...init, headers: { ...init.headers, Origin: 'http://localhost:5173', 'User-Agent': 'VisorGIS/0.4 manual-integration-check' } });
+  const response = await fetch(url, { ...init, headers: { ...init.headers, Origin: 'http://localhost:5173', 'User-Agent': 'VisorGIS/1.1 manual-integration-check' } });
   requests.push({ service: new URL(url).origin, status: response.status, cors: response.headers.get('access-control-allow-origin') });
   return response;
 } });

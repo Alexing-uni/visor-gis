@@ -1,8 +1,10 @@
-# Visor GIS web 1.0
+# Visor GIS web 1.1
+
+**Versión 1.1.** Incluye terreno con capas adaptadas, fondo regional que conserva Portugal y área de alcance en coche. [Qué cambió y cómo](CHANGELOG.md).
 
 Una aplicación para ver datos geográficos, analizar una zona y calcular rutas en coche. Está hecha con React, TypeScript, deck.gl y MapLibre.
 
-**[Abrir el visor](https://alexing-uni.github.io/visor-gis/)** · [Informe Word](docs/Visor_GIS_1.0.docx) · [Informe en texto](docs/MEMORIA.md)
+**[Abrir el visor publicado](https://alexing-uni.github.io/visor-gis/)** · [Informe Word](docs/Visor_GIS_1.1.docx) · [Informe en texto](docs/MEMORIA.md)
 
 ## Qué puedes hacer
 
@@ -11,6 +13,7 @@ Una aplicación para ver datos geográficos, analizar una zona y calcular rutas 
 - Seleccionar un rectángulo o dibujar un polígono por puntos. El modo libre calcula al cerrar la figura.
 - Contar entidades, consultar estadísticas y exportar resultados.
 - Buscar origen y destino y calcular una ruta real en coche.
+- Calcular el área aproximada accesible en coche en 5 a 60 minutos.
 - Importar GeoJSON y añadir fuentes de imágenes compatibles, como WMS.
 
 Las imágenes de PNOA e hidrografía sirven de referencia visual: no aportan entidades al recuento. Las rutas usan servicios externos y no incluyen tráfico en tiempo real.
@@ -44,6 +47,6 @@ En GitHub Pages, los cambios e importaciones se guardan en el navegador. No se c
 
 ## Guías
 
-[Publicar en GitHub Pages](docs/PAGES.md) · [Análisis](docs/ANALISIS.md) · [Rutas](docs/RUTAS.md) · [Datos e importación](docs/DATOS.md) · [Fuentes y relieve](docs/FUENTES.md)
+[Publicar en GitHub Pages](docs/PAGES.md) · [Análisis](docs/ANALISIS.md) · [Rutas](docs/RUTAS.md) · [Datos e importación](docs/DATOS.md) · [Fuentes y relieve](docs/FUENTES.md) · [Área de alcance](docs/ALCANCE-Y-3D-LOCAL.md)
 
 Para entender el código: [estructura](docs/ARCHITECTURE.md). Para conocer el estado real: [funciones y límites](docs/ACEPTACION.md), [pruebas realizadas](docs/VERIFICACION.md) y [revisión del recuento](docs/RECUENTO.md).

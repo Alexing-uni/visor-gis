@@ -1,8 +1,10 @@
 # Mapa base, fuentes y relieve
 
-El mapa base utiliza OpenFreeMap. Puedes cambiar su aspecto y pasar entre vista 2D y 3D. El relieve usa teselas Terrarium alojadas en AWS; el control de exageración cambia su apariencia.
+El fondo 2D utiliza OpenFreeMap. En 3D, deck.gl dibuja un terreno con elevaciones Terrarium de AWS y textura OpenStreetMap. La exageración va de 0 (plano) a 3, con 1 como altura sin exagerar.
 
-Las capas deck.gl no se adaptan a la superficie del terreno. El análisis y la selección de puntos de ruta se realizan en 2D para evitar confusiones al pulsar.
+Las capas, imágenes y rutas se adaptan a la misma superficie mediante TerrainExtension. Una copia de dibujo elimina su Z propia para evitar que floten; los originales conservan esa coordenada. El análisis y la selección de puntos se realizan en 2D. El modelo no representa edificios o puentes elevados.
+
+En Fuentes, «Mapa base regional» sustituye visualmente el fondo solo donde aporta imagen. Así, PNOA cubre España y Portugal sigue visible. Con opacidad menor que 100 % ambos se mezclan. Los huecos dependen de la transparencia del servicio; «Sin fondo» desactiva el apoyo global. Solo se activa una imagen base regional a la vez; las capas temáticas pueden seguir superpuestas.
 
 ## Fuentes incluidas
 

@@ -1,11 +1,11 @@
 import type { Bounds } from '../types.ts';
 
 export type RasterSource = {
-  id: string; name: string; type: 'wms' | 'wmts'; url: string; layers?: string;
+  role?: 'base' | 'overlay'; id: string; name: string; type: 'wms' | 'wmts'; url: string; layers?: string;
   attribution: string; visible: boolean; opacity: number; bounds?: Bounds;
 };
 export const officialSources: RasterSource[] = [
-  { id: 'pnoa', name: 'Ortofoto PNOA', type: 'wms', url: 'https://www.ign.es/wms-inspire/pnoa-ma', layers: 'OI.OrthoimageCoverage', attribution: 'PNOA cedido por © Instituto Geográfico Nacional de España', visible: false, opacity: 1, bounds: [-9.5, 36, 3.4, 43.9] },
+  { role: 'base', id: 'pnoa', name: 'Ortofoto PNOA', type: 'wms', url: 'https://www.ign.es/wms-inspire/pnoa-ma', layers: 'OI.OrthoimageCoverage', attribution: 'PNOA cedido por © Instituto Geográfico Nacional de España', visible: false, opacity: 1, bounds: [-9.5, 36, 3.4, 43.9] },
   { id: 'hydro', name: 'Ríos y red hidrográfica', type: 'wms', url: 'https://servicios.idee.es/wms-inspire/hidrografia', layers: 'HY.Network', attribution: '© IGN · Sistema Cartográfico Nacional · IGR Hidrografía', visible: false, opacity: 0.85, bounds: [-9.5, 36, 3.4, 43.9] },
 ];
 export function validateRaster(input: RasterSource): RasterSource {
@@ -26,4 +26,16 @@ export function tileUrl(source: RasterSource, tile: {x:number;y:number;z:number}
   const a=mercator(bounds[0],bounds[1]), b=mercator(bounds[2],bounds[3]);
   Object.entries({ SERVICE:'WMS', REQUEST:'GetMap', VERSION:'1.1.1', LAYERS:source.layers!, STYLES:'', FORMAT:'image/png', TRANSPARENT:'TRUE', SRS:'EPSG:3857', BBOX:[...a,...b].join(','), WIDTH:'256', HEIGHT:'256' }).forEach(([key,value])=>url.searchParams.set(key,value));
   return url.toString();
+}
+
+// Selecting a background switches off other background images, not thematic overlays.
+export function updateRaster(sources: RasterSource[], id: string, patch: Partial<RasterSource>): RasterSource[] {
+  const target = sources.find(s => s.id === id);
+  if (!target) return sources;
+  const next = {...target, ...patch};
+  return sources.map(s => s.id === id ? next : next.visible && next.role === 'base' && s.role === 'base' ? {...s, visible:false} : s);
+}
+export function activeRasters(sources: RasterSource[]): RasterSource[] {
+  const base = [...sources].reverse().find(s => s.visible && s.role === 'base');
+  return [...(base ? [base] : []), ...sources.filter(s => s.visible && s.role !== 'base')];
 }

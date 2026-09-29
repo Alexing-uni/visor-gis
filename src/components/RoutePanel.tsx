@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { formatDistance, formatDuration, routingClient } from '../lib/routing.ts';
 import type { RouteEndpoint, RouteEndpointKind, RouteResult } from '../lib/routing.ts';
 import './RoutePanel.css';
@@ -14,10 +14,11 @@ export type RoutePanelProps = {
   onPick: (kind: RouteEndpointKind | null) => void;
 };
 
-function EndpointSearch({ kind, value, reset, picking, onChange, onPick }: {
+export function EndpointSearch({ kind, value, reset, picking, onChange, onPick }: {
   kind: RouteEndpointKind; value: RouteEndpoint | null; reset: number; picking: boolean;
   onChange: (point: RouteEndpoint | null) => void; onPick: () => void;
 }) {
+  const inputId = useId();
   const title = kind === 'origin' ? 'Origen' : 'Destino';
   const [query, setQuery] = useState(value?.label || '');
   const [results, setResults] = useState<RouteEndpoint[]>([]);
@@ -52,9 +53,9 @@ function EndpointSearch({ kind, value, reset, picking, onChange, onPick }: {
     } finally { if (!active.signal.aborted) setBusy(false); }
   };
   return <div className="route-endpoint">
-    <label htmlFor={`route-${kind}`}><span className={`route-marker ${kind}`}>{kind === 'origin' ? 'A' : 'B'}</span>{title}</label>
+    <label htmlFor={inputId}><span className={`route-marker ${kind}`}>{kind === 'origin' ? 'A' : 'B'}</span>{title}</label>
     <form className="route-search-form" onSubmit={event => { event.preventDefault(); void search(); }}>
-      <input id={`route-${kind}`} value={query} placeholder="Dirección, localidad, país…" maxLength={250} autoComplete="off"
+      <input id={inputId} value={query} placeholder="Dirección, localidad, país…" maxLength={250} autoComplete="off"
         onChange={event => { controller.current?.abort(); setBusy(false); setQuery(event.target.value); setResults([]); setError(''); if (value) onChange(null); }}/>
       <button type="submit" disabled={busy || query.trim().length < 3} aria-label={`Buscar ${title.toLowerCase()}`}>{busy ? 'Buscando…' : 'Buscar'}</button>
     </form>
