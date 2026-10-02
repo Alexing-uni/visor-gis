@@ -1,4 +1,4 @@
-"""Rebuild docs/Visor_GIS_1.1.docx from docs/MEMORIA.md using python-docx.
+"""Rebuild docs/Visor_GIS_1.2.docx from docs/MEMORIA.md using python-docx.
 
 Run with a Python environment that includes python-docx:
   python scripts/generate-docx.py
@@ -126,7 +126,7 @@ def configure(document):
         toc.font.bold = level == 1
     footer = section.footer.paragraphs[0]
     footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = footer.add_run('Visor GIS 1.1  |  ')
+    run = footer.add_run('Visor GIS 1.2  |  ')
     run.font.size = Pt(9)
     field = node('w:fldSimple', **{'w:instr': 'PAGE'})
     field.append(node('w:r'))
@@ -134,7 +134,7 @@ def configure(document):
     field[0][0].text = '1'
     footer._p.append(field)
     document.settings.element.append(node('w:updateFields', **{'w:val': 'true'}))
-    document.core_properties.title = 'Visor GIS web versión 1.1'
+    document.core_properties.title = 'Visor GIS web versión 1.2'
     document.core_properties.subject = 'Informe resumido del visor GIS'
     document.core_properties.author = 'Proyecto Visor GIS'
     document.core_properties.keywords = 'GIS, deck.gl, MapLibre, React, análisis, rutas, GitHub Pages'
@@ -323,6 +323,6 @@ def build(source: Path, output: Path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--source', type=Path, default=ROOT / 'docs' / 'MEMORIA.md')
-    parser.add_argument('--output', type=Path, default=ROOT / 'docs' / 'Visor_GIS_1.1.docx')
+    parser.add_argument('--output', type=Path, default=ROOT / 'docs' / 'Visor_GIS_1.2.docx')
     arguments = parser.parse_args()
     build(arguments.source, arguments.output)

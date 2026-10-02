@@ -72,3 +72,5 @@ html,body,#root{height:100%;width:100%;overflow:hidden}body{color:#193b42;backgr
 
 /* Keep source roles and map settings usable on narrow and short screens. */
 .source-card>label{display:block;margin-top:10px}.source-card>label>.ant-select{display:block;width:100%;margin-top:6px}.map-settings[open]{max-height:calc(100% - 95px);overflow:auto}
+.raster-attributions a{pointer-events:auto}
+@media(max-width:800px){.panel-open .map-settings[open]{max-height:calc(54dvh - 100px)}}

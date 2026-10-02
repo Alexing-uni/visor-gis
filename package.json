@@ -1,6 +1,6 @@
 {
   "name": "visor-gis",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -23,6 +23,8 @@
     "@deck.gl/geo-layers": "^9.2.0",
     "@deck.gl/layers": "^9.4.0",
     "@deck.gl/mapbox": "^9.2.0",
+    "@loaders.gl/core": "^4.5.2",
+    "@loaders.gl/mvt": "^4.5.2",
     "@loaders.gl/terrain": "^4.5.2",
     "@turf/bbox": "^7.2.0",
     "@turf/turf": "^7.4.0",

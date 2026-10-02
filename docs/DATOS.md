@@ -16,7 +16,7 @@ Son los datos recibidos con el proyecto anterior. Estos nombres no acreditan por
 
 En el panel de importación, elige un archivo GeoJSON o su enlace directo. El límite es 30 MiB. Se admiten puntos, líneas y polígonos, también múltiples; las colecciones mixtas se separan por tipo. Los sistemas de coordenadas admitidos son EPSG:4326, 4258, 3857 y 31994.
 
-Una página con un visor no es un GeoJSON. Un WMS sirve imágenes y se añade como fuente de mapa. Los WMTS requieren una plantilla compatible; no se interpreta automáticamente cualquier servicio. Shapefile, KML y GeometryCollection necesitan conversión previa, por ejemplo con QGIS.
+Una página con un visor no es un GeoJSON. Un WMS sirve imágenes y se registra en «Importar»: si es temático aparece en «Capas»; si es un fondo regional, en «Mapa y relieve». Los WMTS requieren una plantilla compatible; no se interpreta automáticamente cualquier servicio. Shapefile, KML y GeometryCollection necesitan conversión previa, por ejemplo con QGIS.
 
 Si un enlace falla, comprueba que devuelve datos, usa HTTPS y permite acceso desde otro sitio (CORS). Descargar el archivo e importarlo localmente puede resolver un bloqueo CORS.
 

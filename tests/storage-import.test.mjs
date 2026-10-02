@@ -53,7 +53,7 @@ test('Descarga verifica contenido real, errores HTTP y límite de tamaño', asyn
   await assert.rejects(fetchGeoJson('https://ejemplo.es/data.json'), /HTTP 503/);
   response = new Response('{}', { headers: { 'content-length': String(31 * 1024 * 1024) } });
   await assert.rejects(fetchGeoJson('https://ejemplo.es/data.json'), /30 MiB/);
-  await assert.rejects(fetchGeoJson('https://ejemplo.es/wms?service=WMS'), /Fuentes ráster/);
+  await assert.rejects(fetchGeoJson('https://ejemplo.es/wms?service=WMS'), /Importar WMS o WMTS/);
 });
 
 test('IndexedDB conserva configuración e importación al abrir otro cliente y elimina solo imports', async () => {

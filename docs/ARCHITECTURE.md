@@ -6,8 +6,9 @@ La aplicación tiene una interfaz en el navegador y un servidor opcional para el
 | --- | --- |
 | `src/App.tsx` | Conecta los paneles y el estado de la aplicación. |
 | `src/components/MapView.tsx` | Dibuja el mapa, las capas y las selecciones. |
-| `src/components/` | Paneles de capas, análisis, rutas, alcance, importación y fuentes. |
-| `src/lib/` | Cálculos geográficos, rutas, alcance, alturas, importación y almacenamiento. |
+| `src/components/` | Paneles de capas, análisis, rutas, isócronas e importación; servicios integrados en Capas y selector de fondos en el mapa. |
+| `src/lib/` | Cálculos geográficos, rutas, isócronas, alturas, edificios, tonos 3D, importación y almacenamiento. |
+| `src/lib/basemaps.ts`, `terrainSource.ts`, `satelliteSource.ts` | Catálogo de fondos y carga de elevaciones e imágenes, con recuperación de niveles disponibles. |
 | `src/model/` | Tipos de capas y atributos que se muestran. |
 | `src/hooks/useLayers.ts` | Carga las capas y guarda sus ajustes. |
 | `src/config/defaultLayers.ts` | Capas iniciales del modo estático. |

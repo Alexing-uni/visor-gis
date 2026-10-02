@@ -1,5 +1,24 @@
 # Cambios del visor
 
+## 1.2.0 — 2 de octubre de 2026
+
+Actualización local para revisión.
+
+- PNOA pasa al selector de «Mapa y relieve», junto a Claro y Oscuro; se conserva el fondo fuera de su cobertura.
+- PNOA usa siempre Satélite global como apoyo, sin heredar Oscuro. Se añaden Satélite de VersaTiles y Cartográfico en color (Liberty en 2D, textura OSM en 3D).
+- Mapterhorn aporta el nuevo relieve; AWS queda seleccionable. Los niveles sin cobertura reutilizan un antecesor recortado correctamente, con caché, cancelación y límite de descargas.
+- Hidrografía y servicios temáticos pasan a «Capas». El registro WMS/WMTS queda en «Importar»; se elimina el menú Fuentes.
+- «Alcance» se llama «Isócronas»; conserva sus cálculos y exportación.
+- El terreno usa iluminación neutra y refinamiento sin solapamiento para evitar las manchas de sombreado por triángulos.
+- La imagen cartográfica 3D carga teselas independientes del DEM y cambia de tono con el fondo.
+- Se añaden edificios opcionales de OpenFreeMap: alturas orientativas, filtradas y apoyadas en el terreno con deck.gl. No cuentan como entidades GIS.
+- El worker MVT se empaqueta con Vite. El control de edificios detecta soporte GPU.
+- Los ajustes del mapa pliegan el panel de herramientas en móvil.
+- README y memoria simplificados; guías de APIs, estilos sin clave, Maputnik, 3D y Word 1.2. Pruebas nuevas de edificios, fondo PNOA y carga de elevaciones.
+- 68 pruebas automáticas correctas; comprobaciones adicionales de alturas/píxeles en navegador, modo Pages, móvil/tableta y 15 recursos externos.
+
+Mapbox se ha investigado y documentado como alternativa; esta versión utiliza OpenFreeMap y no necesita un token Mapbox.
+
 ## 1.1.0 — 28 de septiembre de 2026
 
 Versión 1.1 publicada mediante el repositorio `Alexing-uni/visor-gis`. GitHub Actions compila y despliega Pages al actualizar `main`. El estado del despliegue se comprueba en Actions.

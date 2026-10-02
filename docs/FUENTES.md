@@ -1,22 +1,11 @@
-# Mapa base, fuentes y relieve
+# Mapa base y servicios · versión 1.2
 
-El fondo 2D utiliza OpenFreeMap. En 3D, deck.gl dibuja un terreno con elevaciones Terrarium de AWS y textura OpenStreetMap. La exageración va de 0 (plano) a 3, con 1 como altura sin exagerar.
+«Mapa y relieve» reúne **Claro, Oscuro, Cartográfico en color, Satélite global y Ortofoto PNOA**, además de «Sin fondo» y fondos regionales registrados. PNOA utiliza imágenes globales fuera de su cobertura aunque antes estuviera elegido Oscuro. No existe un panel de navegación separado «Fuentes».
 
-Las capas, imágenes y rutas se adaptan a la misma superficie mediante TerrainExtension. Una copia de dibujo elimina su Z propia para evitar que floten; los originales conservan esa coordenada. El análisis y la selección de puntos se realizan en 2D. El modelo no representa edificios o puentes elevados.
+«Capas» contiene la red hidrográfica de IGN/IDEE y los servicios temáticos añadidos. Usa «Importar» para registrar un WMS o WMTS compatible. WMS devuelve imágenes, por lo que no permite contar automáticamente ríos u otros objetos. Los edificios del fondo tampoco se incluyen en los análisis GIS.
 
-En Fuentes, «Mapa base regional» sustituye visualmente el fondo solo donde aporta imagen. Así, PNOA cubre España y Portugal sigue visible. Con opacidad menor que 100 % ambos se mezclan. Los huecos dependen de la transparencia del servicio; «Sin fondo» desactiva el apoyo global. Solo se activa una imagen base regional a la vez; las capas temáticas pueden seguir superpuestas.
+En 2D se utilizan estilos OpenFreeMap y las imágenes de VersaTiles; en 3D, terreno deck.gl con Mapterhorn o AWS. Claro/Oscuro usan textura OSM monocroma; Cartográfico, OSM en color; Satélite, imágenes VersaTiles. PNOA conserva sus colores. Los niveles de alturas o imágenes ausentes reutilizan la zona correspondiente de un nivel anterior. Las atribuciones deben mantenerse al reutilizar el proyecto.
 
-## Fuentes incluidas
+Para registrar un servicio fijo, edita `src/lib/raster.ts`, siguiendo una entrada existente: URL, nombre técnico de capa, atribución, uso y cobertura. Comprueba HTTPS, CORS y coordenadas. Una página con un visor no es un servicio importable.
 
-- **PNOA del IGN**: ortofotografía, útil para reconocer edificios y parcelas.
-- **Hidrografía de IGN/IDEE**: referencia visual de la red hidrográfica.
-
-Ambas se consumen como imágenes WMS: no permiten contar automáticamente ríos u otros objetos. El visor muestra las atribuciones; deben conservarse al reutilizar el proyecto.
-
-## Añadir una fuente
-
-Usa el panel de fuentes con un WMS compatible o una plantilla WMTS admitida. Para dejar una fuente registrada en el código, edita `src/lib/raster.ts`, siguiendo una entrada existente: dirección, nombre de capa, formato y atribución.
-
-No pegues la dirección de otra aplicación esperando importar sus datos. Comprueba el servicio y sus condiciones de uso. En Pages, el servidor externo debe admitir HTTPS y acceso desde el navegador. Una respuesta correcta fuera del navegador no garantiza que CORS permita cargarla.
-
-Las comprobaciones guardadas están en `sources-check.json`. La disponibilidad puede cambiar porque son servicios externos.
+La guía completa está en [Mapa, relieve e isócronas](ISOCRONAS-Y-3D.md). Las URLs, procedencia y condiciones están en [APIs y proveedores](PROVEEDORES.md); las comprobaciones, en [Verificación](VERIFICACION.md).

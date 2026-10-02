@@ -1,102 +1,107 @@
 # Visor GIS web
 
-Informe resumido de la versión 1.1
+Memoria resumida de la versión 1.2 · 2 de octubre de 2026
 
-Esta memoria explica qué hace el visor, cómo se ha construido y qué archivos permiten ampliarlo. La versión 1.1 se entrega en GitHub. Revisión del 29 de septiembre de 2026.
+Esta memoria explica la utilidad del visor, cómo se implementa y qué archivos permiten ampliarlo. Las comprobaciones se recogen en `docs/VERIFICACION.md`.
+
+En Word, actualiza el índice con el botón derecho y «Actualizar campo».
 
 ## 1 Objetivo y utilidad
 
-El visor permite consultar datos geográficos desde el navegador. Por ejemplo, seleccionar una zona de Asturias para contar tramos de carretera, observar una ortofoto de España o estimar hasta dónde llegar en coche en 20 minutos. La organización de paneles y herramientas toma como referencia funcional Global Nature Watch, adaptada a este proyecto.
+El visor permite consultar datos geográficos desde el navegador. Por ejemplo, contar tramos de carretera dentro de una zona de Asturias, consultar la ortofoto de España o estimar el área accesible en coche en 20 minutos. Los paneles toman como referencia funcional Global Nature Watch, adaptada a este proyecto.
 
 ## 2 Alcance y cambios de versión
 
-Se conserva la base React, TypeScript y deck.gl, los datos originales y el modo local con backend. La 1.0 ya incorporaba capas configurables, selección rectangular y libre, recuentos, rutas, importación y GitHub Pages. La 1.1 añade el área de alcance, cambia la representación del terreno y corrige las capas que flotaban. También conserva el fondo global fuera de la cobertura de una imagen regional y actualiza la documentación.
+Se conservan React, TypeScript, deck.gl, los datos originales y el backend local. La 1.0 incorporó capas, análisis rectangular y libre, rutas, importación y Pages. La 1.1 añadió isócronas y un terreno único para apoyar las capas sin que flotasen; también mantuvo el fondo fuera de PNOA.
 
-Es una base funcional para aprender y ampliar un GIS web. No incluye edición completa de geometrías ni trabajo compartido. Al subir la 1.1 a `main`, GitHub Actions inicia el despliegue; su resultado se comprueba en Actions.
+La 1.2 elimina el acceso separado «Fuentes», reúne los fondos en «Mapa y relieve» y coloca hidrografía en «Capas». Añade Cartográfico en color y Satélite global; PNOA siempre conserva imágenes fuera de España aunque antes se usara Oscuro. Cambia «Alcance» por «Isócronas», ajusta la iluminación del terreno, incorpora Mapterhorn como fuente de alturas y añade edificios con volumen opcionales. Edición de geometrías, usuarios y datos compartidos siguen pendientes.
 
 ## 3 Funcionalidades y cumplimiento
 
-| Función solicitada | Estado real |
+| Función | Estado real |
 | --- | --- |
-| Capas y paneles | Visibilidad, orden, estilos, leyenda, opacidad, plegado y anchura ajustable en escritorio. |
+| Capas e interfaz | Estilos, leyenda, opacidad, orden, panel plegable y adaptación a pantallas pequeñas. Hidrografía y otros servicios se gestionan en Capas. |
 | Análisis | Rectángulo y polígono libre cerrado; recuentos, estadísticas, medidas interiores, resaltado y exportación. |
-| Rutas | Búsqueda, selección en mapa, intercambio, recorrido real, distancia, duración e indicaciones en coche. |
-| Alcance | Contorno aproximado accesible en coche entre 5 y 60 minutos y exportación GeoJSON. |
-| Relieve y fuentes | Terreno aproximado con alturas reales, capas adaptadas a su superficie, PNOA e hidrografía WMS. |
-| Importación y despliegue | GeoJSON, WMS y WMTS compatibles; modos local y estático. La publicación se comprueba en GitHub Actions. |
-| Pendiente | Usuarios, datos compartidos, otros transportes, tráfico y optimización para grandes volúmenes. |
+| Rutas | Búsqueda, puntos en mapa, intercambio, recorrido real, distancia, duración e indicaciones en coche. |
+| Isócronas | Contorno aproximado accesible desde un origen en 5–60 minutos y exportación GeoJSON. |
+| Mapa y 3D | Claro, Oscuro, Cartográfico, Satélite y PNOA; relieve Mapterhorn o AWS con capas adaptadas y edificios opcionales de altura orientativa. |
+| Importación y almacenamiento | GeoJSON y WMS/WMTS compatibles; backend local y modo estático con almacenamiento del navegador. |
+| Pendiente | Usuarios, datos compartidos, otros transportes, tráfico y optimización para grandes conjuntos. |
 
 ## 4 Tecnologías y motivo de uso
 
-| Tecnología | Función y motivo |
+| Tecnología | Para qué se utiliza y por qué |
 | --- | --- |
-| React y TypeScript | React divide la interfaz en componentes; TypeScript comprueba los tipos de capas y respuestas para detectar errores antes de ejecutar. |
-| Vite | Sirve el proyecto durante el desarrollo y genera los archivos estáticos de producción. |
-| deck.gl | Es el motor principal: dibuja capas, imágenes, rutas, selecciones y terreno con la tarjeta gráfica y permite seleccionar entidades. |
-| MapLibre | Controla la cámara, navegación y fondo 2D. MapboxOverlay sincroniza su vista con deck.gl. |
-| Turf y proj4 | Turf calcula intersecciones, áreas y distancias; proj4 transforma coordenadas a un sistema común. |
-| TerrainExtension y loaders.gl | Adaptan las capas al terreno y convierten teselas de elevación en una malla. El trabajador de terreno se incluye en la compilación. |
-| Ant Design y CSS | Aportan controles de formulario y adaptan los paneles al tamaño de pantalla. |
-| Node.js y Express | Ejecutan la API local para configuración, datos y búsqueda local. Se utiliza Node 24. |
-| SQLite y almacenamiento web | SQLite guarda configuración local; IndexedDB guarda datos del navegador y localStorage preferencias de imágenes. |
-| GitHub Actions y Pages | Automatizan pruebas, compilación y publicación de la modalidad estática. |
+| React y TypeScript | Dividen la interfaz en componentes y comprueban los tipos antes de ejecutar. |
+| Vite | Sirve el desarrollo y genera los archivos estáticos de publicación. |
+| deck.gl | Motor principal: dibuja vectores, imágenes, selecciones, rutas, terreno y edificios con la GPU. |
+| MapLibre | Controla cámara, navegación y fondo 2D; MapboxOverlay sincroniza la vista con deck.gl. |
+| Turf y proj4 | Calculan intersecciones y medidas y transforman coordenadas. |
+| loaders.gl y TerrainExtension | Decodifican teselas y adaptan capas a la malla del terreno. |
+| Ant Design y CSS | Aportan formularios y paneles adaptados al tamaño de pantalla. |
+| Node.js, Express y SQLite | Ejecutan la API local y conservan la configuración de capas. |
+| IndexedDB y localStorage | Guardan importaciones, configuración y preferencias en el navegador. |
+| GitHub Actions y Pages | Comprueban, compilan y publican el modo estático. |
 
 ## 5 Estructura del proyecto
 
-- `src/App.tsx`: conecta los paneles y el estado general.
-- `src/components/`: interfaz; `MapView.tsx` conecta el mapa y deck.gl.
-- `src/lib/`: análisis, rutas, alcance, coordenadas, imágenes, importación y almacenamiento.
-- `src/model/`: PointLayer, LineLayer y PolygonLayer; estilos y atributos por tipo.
-- `src/hooks/useLayers.ts`: carga las capas y guarda su configuración.
-- `src/config/defaultLayers.ts`: capas iniciales del modo estático.
-- `public/data/`: GeoJSON y datos auxiliares estáticos.
-- `server/`: API Express, catálogo de lugares y SQLite.
-- `tests/`, `docs/` y `.github/workflows/`: pruebas, documentación y publicación.
-- `package.json`, `package-lock.json` y `vite.config.ts`: versión, dependencias, comandos y configuración de compilación.
+- `src/App.tsx`: conecta paneles y estado general.
+- `src/components/MapView.tsx`: conecta la cámara de MapLibre y el dibujo deck.gl.
+- `src/components/`: paneles de capas, análisis, rutas, isócronas e importación.
+- `src/lib/`: cálculos, proveedores, coordenadas, imágenes y almacenamiento; `basemaps.ts` registra fondos, `terrainSource.ts` carga alturas, `buildings.ts` valida edificios y `basemapTone.ts` ajusta los tonos 3D.
+- `src/model/`: PointLayer, LineLayer y PolygonLayer, con estilos y atributos.
+- `src/hooks/useLayers.ts`: carga capas y guarda su configuración.
+- `src/config/defaultLayers.ts` y `server/database.js`: configuración inicial estática y local.
+- `public/data/`, `server/`, `tests/`, `docs/`: datos, API, pruebas y documentación.
+- `pages.yml`, `vite.config.ts` y `package.json`: publicación, compilación, comandos y versión.
 
 ## 6 Flujo de datos
 
-Al abrir el visor, `useLayers.ts` obtiene la configuración desde la API local o el catálogo estático. Después carga los GeoJSON, valida geometrías y normaliza coordenadas mediante `geojson.ts`. Las clases de `src/model/` crean las capas deck.gl y `MapView.tsx` las dibuja.
+`useLayers.ts` lee la configuración de la API local o del almacenamiento estático. Carga los GeoJSON y `geojson.ts` valida geometrías y coordenadas. Las clases de `src/model/` crean las capas que dibuja `MapView.tsx`.
 
-Al cambiar un control, React actualiza el estado y se guardan las preferencias correspondientes. Al cerrar una selección, `App.tsx` llama a `analyzeLayers` y envía sus resultados a `AnalysisPanel.tsx`. El análisis ocurre en el navegador. Las rutas y el alcance consultan proveedores externos; deck.gl dibuja la geometría que devuelven.
+Al cambiar un control, React actualiza el mapa y guarda las preferencias correspondientes. El análisis se calcula en el navegador. Rutas e isócronas consultan proveedores externos; deck.gl dibuja sus respuestas. WMS devuelve imágenes y las teselas de edificios y relieve se cargan según la vista.
 
 ## 7 Procedencia de bibliotecas y datos
 
-Las bibliotecas se instalan desde npm. `package.json` declara rangos y `package-lock.json` fija versiones concretas para reproducir la instalación con `npm.cmd ci`. Una importación de `@deck.gl/layers` usa una biblioteca; una de `../lib/analysis.ts` usa código del proyecto.
+Las bibliotecas se instalan desde npm. `package.json` declara dependencias y `package-lock.json` fija versiones para repetir la instalación. Importar `@deck.gl/layers` utiliza una biblioteca; importar `../lib/analysis.ts` utiliza código propio.
 
-Se conservan 9.999 puntos de Chile en EPSG:31994, 6.233 entidades de líneas de Asturias en EPSG:4258 y 399 polígonos de Chile en EPSG:4326. Son los datos heredados; no se acredita una nueva licencia de redistribución. El archivo `example-import.geojson` aporta cuatro entidades ficticias para practicar.
+Se mantienen 9.999 puntos de Chile en EPSG:31994, 6.233 entidades de líneas de Asturias en EPSG:4258 y 399 polígonos de Chile en EPSG:4326. Son datos heredados; no se ha acreditado una nueva licencia de redistribución. `example-import.geojson` contiene cuatro entidades ficticias para practicar.
 
-PNOA procede del IGN y la hidrografía de IGN/IDEE. Se solicitan imágenes WMS con atribución visible. OpenFreeMap proporciona los fondos 2D; OpenStreetMap, la textura 3D; Terrain Tiles en AWS, elevaciones Terrarium. Photon busca direcciones, OSRM calcula rutas y Valhalla calcula alcance. Estos servicios dependen de conexión, cobertura y límites de uso.
+PNOA e hidrografía proceden de IGN/IDEE. OpenFreeMap aporta cartografía y edificios basados en OpenStreetMap; OpenMapTiles aporta su esquema de datos. VersaTiles aporta imágenes globales de Sentinel-2 y ortofotos regionales, entre ellas Portugal. Mapterhorn combina elevaciones globales y fuentes regionales más detalladas; AWS Terrain Tiles queda como alternativa. Photon busca direcciones, OSRM calcula rutas y Valhalla calcula isócronas. `docs/PROVEEDORES.md` explica URLs, acceso, atribución y límites.
 
 ## 8 Implementación y uso de las herramientas
 
-**Capas y paneles.** En Capas se cambia visibilidad, orden, color, grosor, radio y opacidad. Encuadrar lleva a cada conjunto. `LayerCard.tsx` presenta los controles y `src/model/` produce las capas. `App.tsx` y `style.css` permiten plegar y ajustar el panel en escritorio y mostrarlo abajo en pantallas pequeñas. Al seleccionar zonas o puntos en móvil, se pliega y vuelve a abrir al terminar.
+**Capas.** Cambia visibilidad, estilos, opacidad y encuadre. Hidrografía aparece aquí como imagen WMS. `LayerCard.tsx` y `src/model/` manejan vectores; `raster.ts` define servicios. `App.tsx` y `style.css` organizan paneles. En móvil se pliegan al elegir puntos o zonas y vuelven a abrir al terminar.
 
-**Rectángulo y modo libre.** En Análisis se arrastra un rectángulo o se tocan dos esquinas. En Libre se marcan al menos tres puntos y se cierra tocando el primero o pulsando Cerrar y analizar. Mientras esté abierto no se calcula. Se pueden deshacer puntos, cancelar y repetir. `MapView.tsx` recoge las interacciones y `analysis.ts` rechaza contornos cruzados, repetidos, alineados o inválidos.
+**Análisis.** Arrastra un rectángulo o toca dos esquinas. En Libre marca al menos tres puntos y cierra tocando el primero o pulsando «Cerrar y analizar». Mientras esté abierto no se calcula. `MapView.tsx` recoge la selección y `analysis.ts` valida el contorno y calcula.
 
-Se cuenta la intersección de la geometría real con la selección, incluido su borde. Cada Feature cuenta una vez, aunque sea MultiPoint, MultiLineString o MultiPolygon. Dos registros iguales siguen contando como dos; no se deduplican entre capas. Solo participan vectores visibles con opacidad mayor que cero. Si falta una capa visible por cargar, se avisa de resultado parcial. Las imágenes WMS/WMTS quedan fuera.
+Cada Feature que intersecta la zona, incluido su borde, cuenta una vez. Un MultiPoint, MultiLineString o MultiPolygon sigue siendo una entidad; dos registros iguales cuentan como dos. Participan vectores visibles con opacidad mayor que cero. Imágenes y edificios del fondo quedan fuera. Si falta una capa visible por cargar, se avisa del resultado parcial.
 
-Turf verifica intersecciones y recorta polígonos. Para las líneas se recortan segmentos con Liang–Barsky en rectángulos; en selección libre se separan en los cruces del contorno y se miden los intervalos interiores. Tocar un borde puede contar una entidad y aportar longitud o área cero. Se respetan huecos y se suman las áreas de entidades superpuestas. Son medidas geográficas aproximadas, no distancias sobre la pendiente del terreno.
+Se muestran superficie, recuentos, estadísticas numéricas y longitudes y áreas interiores. Se respetan huecos; las áreas superpuestas se suman por entidad. Tocar un borde puede contar con medida interior cero. Se excluyen identificadores y estadísticas sin sentido, aunque la clasificación por nombre de atributo puede requerir adaptación. Las medidas son aproximadas del plano geográfico. Se exportan CSV, JSON y entidades completas en GeoJSON.
 
-Se muestran km² o hectáreas, recuentos por capa y tipo, y mínimo, máximo, suma y media de atributos numéricos válidos. Se excluyen códigos e identificadores; no se suman porcentajes, pendientes o cotas, ni se calcula media aritmética de orientaciones. La clasificación por nombre de campo puede necesitar adaptación. Los atributos corresponden a la entidad completa. Se exportan JSON, CSV y las entidades completas en GeoJSON; el resaltado usa las entidades contadas.
+**Rutas.** Busca A y B o márcalos en el mapa; puedes intercambiarlos y limpiar. `routing.ts` consulta Photon y OSRM, valida las respuestas y gestiona cancelaciones y errores. El recorrido procede de la red de carreteras. La configuración ofrece coche sin tráfico en tiempo real.
 
-**Rutas.** `RoutePanel.tsx` permite buscar A y B, elegirlos en el mapa, intercambiarlos y limpiar. `routing.ts` consulta Photon y OSRM con perfil de coche y pasos de navegación. Valida respuestas, usa caché y gestiona cancelaciones, tiempos de espera y falta de acceso. La línea procede del servicio de carreteras, nunca de unir directamente A y B. No hay tráfico, bicicleta o caminata en la configuración actual.
+**Isócronas.** Una isócrona delimita el área aproximada alcanzable desde un origen en un tiempo. Elige 5–60 minutos, con 20 por defecto. `serviceArea.ts` consulta `/locate` de Valhalla para comprobar un acceso a carretera a menos de 1 km y después `/isochrone`. `ServiceAreaPanel.tsx` permite calcular, borrar y exportar.
 
-**Área de alcance.** En Alcance se eligen un origen y entre 5 y 60 minutos, con 20 por defecto. `ServiceAreaPanel.tsx` reutiliza el buscador de rutas. `serviceArea.ts` consulta primero `/locate` de Valhalla para comprobar una carretera a menos de 1 km, y después `/isochrone` con `costing: 'auto'`. Valida el polígono y el tiempo recibido; `MapView.tsx` lo dibuja y encuadra. Se puede borrar o exportar GeoJSON.
+El contorno puede incluir zonas sin acceso directo y no enumera cada calle. El tiempo empieza en el acceso a carretera; la distancia desde el punto elegido se muestra aparte. No calcula batería, ida y vuelta ni tráfico. El servicio puede fallar por carga o cobertura.
 
-El contorno aproxima lugares accesibles saliendo del origen. Puede englobar zonas sin acceso directo y no enumera todas las calles. Se muestra la distancia al acceso a carretera; ese tramo inicial no se incluye en el tiempo. No calcula batería, autonomía eléctrica, ida y vuelta o tráfico. Valhalla/FOSSGIS es un servicio público de demostración para uso moderado.
+**Mapa, relieve y Z.** En «Mapa y relieve» elige Claro, Oscuro, Cartográfico en color, Satélite global u Ortofoto PNOA. `backgroundFor` en `basemaps.ts` hace que PNOA utilice siempre Satélite debajo; cambiar desde Oscuro ya no oscurece Portugal. PNOA tapa el fondo donde aporta imagen y su transparencia deja pasar el fondo. No se detectan automáticamente huecos opacos. Cambiar el fondo conserva capas temáticas.
 
-**Relieve y eje Z.** Antes, el terreno y las alturas propias de las capas podían verse separados. Ahora `elevation.ts` crea una copia de dibujo con longitud y latitud; los datos originales conservan su Z. `MapView.tsx` dibuja una única malla `TerrainLayer` y adapta vectores, imágenes, rutas y selecciones mediante `TerrainExtension` en modo `drape`.
+`TerrainLayer` dibuja una malla de elevaciones Terrarium. `terrainDecoder` convierte colores en alturas: exageración 0 aplana, 1 respeta el modelo y hasta 3 acentúa el relieve. `elevation.ts` prepara una copia sin Z propia para apoyar calles y ríos; las exportaciones conservan los originales. `TerrainExtension` adapta capas a esa superficie con `drape`. Análisis y elección de puntos se realizan en 2D.
 
-Terrarium codifica las alturas en los colores de las teselas. `terrainDecoder` los convierte a elevación y aplica exageración: 0 aplana, 1 mantiene la altura del modelo y hasta 3 la acentúa. Al alternar 2D y 3D se recrean las capas con identificadores distintos para inicializar o retirar el efecto de terreno. MapLibre controla la cámara y deck.gl dibuja el relieve. No representa edificios ni puentes elevados. La extensión es experimental; análisis y elección de puntos se realizan en 2D.
+La 1.2 usa iluminación neutra en el terreno para evitar oscurecer otra vez la ortofoto y destacar facetas como manchas. Una `TileLayer` independiente permite ver imágenes detalladas sin exigir esa misma resolución al DEM. Claro y Oscuro convierten imágenes OSM a tonos monocromos; Cartográfico conserva color; Satélite y el apoyo de PNOA utilizan VersaTiles sin ese filtro. Liberty se usa en 2D; la textura OSM de Cartográfico en 3D tiene otro aspecto y etiquetas. Las sombras presentes en una fotografía permanecen.
 
-**Fondos regionales.** Mapa base regional sitúa una imagen debajo de las capas temáticas y apaga otras imágenes base regionales. El fondo global permanece: PNOA sustituye visualmente España y Portugal sigue visible. `raster.ts` solicita PNG transparente; `MapView.tsx` mantiene el fondo 2D o la textura 3D. Al 100 % los píxeles opacos tapan el fondo; al bajar la opacidad se mezclan. Se respeta la extensión configurada y la transparencia del proveedor; no se detectan automáticamente huecos pintados opacos. Sin fondo desactiva expresamente la cartografía de apoyo.
+`terrainSource.ts` descarga Mapterhorn hasta zoom 16. Cuando recibe 404 busca un nivel anterior y recorta solo el cuadrante de la zona solicitada. Se evita suavizar los canales RGB porque codifican alturas; suavizarlos como colores inventaría elevaciones. La caché y dos descargas simultáneas limitan la carga. Errores de red, 503 o timeout se muestran, sin fingir terreno. El selector permite volver a AWS, hasta zoom 14. Acercar el mapa no mejora los datos originales.
+
+`satelliteSource.ts` aplica esa recuperación también a las imágenes, que no tienen el mismo detalle en todas las zonas. MapLibre usa el protocolo local `visor-satellite://` en 2D y deck.gl usa el mismo cargador en 3D. Ambos descargan realmente por HTTPS de VersaTiles; el protocolo no necesita un backend y funciona en Pages.
+
+**Edificios.** El control opcional carga teselas vectoriales de OpenFreeMap al acercarse a una ciudad. `MVTLayer` y `MVTLoader` decodifican las huellas; el trabajador MVT se incluye en la compilación para no depender de un CDN. deck.gl extruye polígonos con `render_height` y `render_min_height`, y `offset` los apoya en el terreno. Se omiten alturas inválidas y elementos marcados para ocultarse. Las alturas son orientativas, derivadas de OSM; no se asigna una altura fija a todos. No es fotogrametría; no participan en el recuento GIS. La extensión es experimental y puede deformar edificios grandes en laderas.
 
 ## 9 Importar y añadir capas
 
-Importar admite GeoJSON desde archivo o enlace directo, hasta 30 MiB, en EPSG:4326, 4258, 3857 o 31994. `import.ts` distingue archivos, servicios y páginas de visores, valida contenido y separa geometrías mixtas por tipo. `geojson.ts` comprueba coordenadas y anillos. WMS y WMTS se añaden en Fuentes: WMS 1.1.1 EPSG:3857 o plantilla WMTS Web Mercator equivalente a XYZ. HTML no es GeoJSON; otros formatos requieren conversión.
+Importar admite GeoJSON desde archivo o enlace directo, hasta 30 MiB, en EPSG:4326, 4258, 3857 o 31994. `import.ts` distingue archivos, servicios y páginas de visores y separa geometrías mixtas. En Importar se registran WMS 1.1.1 EPSG:3857 y plantillas WMTS Web Mercator compatibles XYZ; los servicios temáticos aparecen en Capas y los mapas regionales en el selector de fondos. Una página HTML no es un archivo geográfico.
 
-Para una capa fija, copia `mis-puntos.geojson` a `public/data/` y añade a `src/config/defaultLayers.ts` una entrada como esta, para puntos en longitud y latitud:
+Para una capa fija, copia `mis-puntos.geojson` a `public/data/` y añade en `src/config/defaultLayers.ts`:
 
 ```typescript
 { id: 'mis-puntos', name: 'Mis puntos', kind: 'point',
@@ -105,15 +110,17 @@ Para una capa fija, copia `mis-puntos.geojson` a `public/data/` y añade a `src/
   width: 1, radius: 5, opacity: 0.9, sort_order: 3 },
 ```
 
-Añade también la configuración inicial equivalente en `server/database.js` para el modo local. Una SQLite existente conserva ajustes: cambiar valores iniciales de una capa existente no los sobrescribe. Los atributos se ajustan en `src/model/PointLayer.ts`, `LineLayer.ts` o `PolygonLayer.ts`; por ejemplo, añade `['nombre', 'Nombre']` a `fields`.
+Añade la configuración equivalente en `server/database.js`. Una SQLite existente conserva ajustes; cambiar valores iniciales no los sobrescribe. Modifica atributos de la ficha en `src/model/PointLayer.ts`, `LineLayer.ts` o `PolygonLayer.ts`, por ejemplo con `['nombre', 'Nombre']` en `fields`.
 
-Las fuentes fijas se registran en `officialSources` dentro de `src/lib/raster.ts`: URL, capa WMS o plantilla, atribución, visibilidad, opacidad, uso y límites. Comprueba GetCapabilities, HTTPS, CORS y coordenadas. Si el navegador bloquea una URL, revisa el servicio o importa un archivo descargado; Pages no puede actuar como proxy de servidor.
+Registra servicios fijos en `officialSources` de `src/lib/raster.ts`: URL, capa, atribución, uso y cobertura. Comprueba GetCapabilities, HTTPS, CORS y coordenadas. Pages no puede actuar como proxy. Para cambiar proveedores de rutas o isócronas, modifica `routing.ts` o `serviceArea.ts` y adapta la validación.
+
+Para diseñar un fondo usa Maputnik con un estilo abierto de OpenFreeMap, guarda el JSON en `public/styles/` y regístralo en `styles` de `src/lib/basemaps.ts`; añade su opción en `MapView.tsx`. El JSON cambia colores y etiquetas, no aporta alturas. No hay importador de estilos ni GeoTIFF en la interfaz. `docs/ESTILOS-Y-RELIEVE.md` contiene el ejemplo y explica PMTiles y otras alternativas sin clave.
 
 ## 10 Crear otro visor con esta base
 
-Copia el proyecto sin dependencias, compilados ni bases locales. Sustituye GeoJSON, configuraciones estática y local, nombres y atribuciones. Cambia los textos de `App.tsx` y estilos de `style.css`. Revisa `LocationSearch.tsx`, `server/places.json` y el catálogo estático; `scripts/update-places.mjs` actualiza este último. El encuadre inicial de `App.tsx` busca `points`: adáptalo si cambias ese identificador.
+Copia el proyecto sin dependencias, compilados ni bases locales. Sustituye GeoJSON, configuraciones estática y local, nombres y atribuciones. Ajusta `App.tsx`, `style.css` y los catálogos de lugares. El encuadre inicial busca `points`: cambia esa referencia si usas otro identificador.
 
-Mantén separados cálculos y paneles. Una herramienta nueva necesita una función en `src/lib/`, un panel en `src/components/` y su conexión en `App.tsx`. Prueba primero con datos conocidos.
+Una herramienta nueva necesita una función en `src/lib/`, un panel en `src/components/` y su conexión en `App.tsx`. Mantén cálculos separados de la interfaz y prueba con datos conocidos.
 
 ## 11 Instalación en Windows
 
@@ -124,35 +131,39 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-Abre http://127.0.0.1:5173/. Express usa el puerto 3001. Ctrl+C detiene el proceso; detén servidores antes de reinstalar. `npm.cmd run dev:static` prueba el modo sin backend. Para servir el proyecto local compilado, ejecuta `npm.cmd run build` y después `npm.cmd start`; abre el puerto 3001.
+Abre http://127.0.0.1:5173/. Express utiliza el puerto 3001. `Ctrl+C` detiene el proceso; detén servidores antes de reinstalar para evitar bloqueos de `esbuild.exe`. `npm.cmd run dev:static` prueba el modo sin backend. Para el proyecto local compilado, ejecuta `npm.cmd run build` y después `npm.cmd start`; abre el puerto 3001.
 
 ## 12 Despliegue en GitHub Pages
 
-`.github/workflows/pages.yml` instala dependencias, ejecuta pruebas, compila con `build:pages` y publica `dist/`. `.env.static` selecciona almacenamiento en navegador. `vite.config.ts` usa `VITE_BASE_PATH`; `environment.ts` aplica esa base a los recursos, incluso bajo `/visor-gis/`.
+`.github/workflows/pages.yml` instala dependencias, ejecuta pruebas, compila `build:pages` y publica `dist/`. `.env.static` selecciona el modo navegador. `VITE_BASE_PATH` en `vite.config.ts` y `environment.ts` conserva rutas de recursos bajo `/visor-gis/`.
 
-Para un repositorio nuevo, créalo en GitHub y ejecuta git init, git add, git commit, git branch, git remote add y git push. Si ya existe, revisa `git remote -v` y reutiliza el remoto. `docs/PAGES.md` contiene todos los comandos y la configuración de autor.
+En un repositorio nuevo: créalo, inicia Git, añade archivos, crea un commit, configura el remoto y sube `main`. En uno existente, revisa `git remote -v` y reutilízalo. En Settings → Pages elige GitHub Actions. Revisa la ejecución en Actions y abre la dirección indicada en Settings → Pages. Los comandos completos están en `docs/PAGES.md`.
 
-En Settings → Pages elige GitHub Actions. Al subir a main o pulsar Run workflow, revisa pruebas, compilación y despliegue en Actions. La dirección aparece en Settings → Pages y en el workflow; para este repositorio es https://alexing-uni.github.io/visor-gis/. Esto no implica que la 1.1 esté publicada.
-
-Para actualizar, ejecuta las pruebas y compilación, revisa `git diff`, crea un commit y haz push. Tras publicar correctamente, el workflow conserva el registro nuevo de Pages y elimina los anteriores de ese entorno. No borra commits ni ejecuciones de Actions; durante el despliegue pueden aparecer varios registros. Este envío a `main` activa el workflow; confirma su resultado en GitHub Actions.
+Para actualizar, ejecuta pruebas y compilación, revisa el diff, crea un commit y haz push. El workflow conserva el registro de Pages más reciente tras un despliegue correcto; no elimina commits ni ejecuciones de Actions. La web solo cambia al completar la publicación.
 
 ## 13 Backend y almacenamiento
 
-`server/index.js` arranca Express y abre `server/visor.sqlite`; `server/app.js` define la API y `server/database.js` gestiona la tabla de capas. SQLite guarda nombres, estilos, orden, visibilidad y referencias. Las geometrías originales siguen en GeoJSON, no en una base espacial.
+`server/index.js` arranca Express, `server/app.js` define la API y `server/database.js` gestiona `server/visor.sqlite`. SQLite guarda configuración y referencias; las geometrías originales siguen en GeoJSON.
 
-En Pages, IndexedDB guarda la configuración. Las importaciones usan IndexedDB en ambos modos; las preferencias WMS/WMTS usan localStorage. Rutas, selecciones y alcance viven en memoria: hay que exportarlos para conservarlos. Borrar los datos del sitio elimina lo guardado; otro origen web o dispositivo usa otro almacenamiento.
+En Pages, IndexedDB guarda configuración. Las importaciones usan IndexedDB en ambos modos; preferencias de servicios usan localStorage. Rutas, selecciones e isócronas están en memoria y se conservan exportándolas. Borrar datos del sitio elimina lo guardado; otro navegador, origen o dispositivo utiliza su propio almacén. Se mantienen los nombres internos anteriores para conservar preferencias.
 
-Se mantiene el nombre interno `visor-gis-v04` de IndexedDB y las claves existentes para no perder preferencias. Ese nombre identifica el almacén, no la versión visible. Pages no ejecuta Express ni SQLite. Compartir datos requiere backend externo; no hay cuentas ni sincronización.
+Pages no ejecuta Express ni SQLite. Compartir datos requiere un backend externo; no hay cuentas ni sincronización.
 
 ## 14 Evolución futura
 
-Una API con PostgreSQL/PostGIS permitiría compartir datos y consultar geometrías en el servidor. Usuarios y permisos controlarían quién consulta o modifica. Para grandes volúmenes convendrían servicios geográficos y teselas vectoriales que entreguen solo la zona necesaria. También queda optimizar la carga inicial y revisar dependencias. Son propuestas, no funciones de la 1.1.
+Una API con PostgreSQL/PostGIS permitiría compartir datos y consultar geometrías en el servidor. Usuarios y permisos controlarían cambios. Para grandes volúmenes convendrían servicios que entreguen solo la zona necesaria. Quedan reducir el tamaño de carga y revisar dependencias.
+
+Se revisó Mapbox Standard, que ofrece edificios, monumentos, terreno e iluminación detallada. Requiere cuenta, token, renderer compatible y revisar costes de uso. La 1.2 implementa OpenFreeMap/deck.gl sin esos requisitos; Mapbox no está integrado. La comparación oficial está en `docs/PROVEEDORES.md`.
 
 ## 15 Pruebas y límites
 
-La batería actual contiene 48 pruebas de análisis, geometrías, API, almacenamiento, importación, rutas, imágenes, alturas y alcance. Incluye persistencia y operaciones que se revierten si fallan. El recuento se contrastó previamente en 45 casos con Shapely/GEOS, todos coincidentes; `docs/count-audit.json` conserva los resultados. Esto respalda esos casos, no garantiza cualquier GeoJSON.
+La versión anterior tenía 48 pruebas de geometrías, análisis, API, almacenamiento, importación, rutas, imágenes y alturas. El recuento se contrastó en 45 casos con Shapely/GEOS, todos coincidentes. Las evidencias conservan su fecha y no equivalen a repetir hoy esas peticiones.
 
-Se verificaron compilaciones local y estática, rutas reales y fuentes oficiales. En la ampliación se probó un alcance real de 20 minutos desde Oviedo y se rechazó un origen en el océano. Se revisaron terreno, exageración cero, retorno a 2D y España con PNOA conservando Portugal en ambas vistas. Se han probado ventanas de escritorio, tableta y móvil, pero no dispositivos táctiles físicos ni todas las tarjetas gráficas.
+Han pasado 68 pruebas automáticas de la 1.2, incluidas edificios, fondo independiente de PNOA y carga del nuevo relieve e imágenes: recorte geográfico, caché, cancelación, límite de descargas, falta de cobertura y errores. El navegador confirmó además los cuatro cuadrantes y sus alturas con el decodificador real. Se han comprobado 15 recursos externos con HTTP 200 y CORS. Se conservan las comprobaciones anteriores de instalación limpia e isócronas. `docs/VERIFICACION.md` distingue pruebas repetidas y evidencias anteriores.
+
+Los servicios necesitan conexión y 3D necesita WebGL; su aspecto depende de GPU, navegador y calidad de datos. La textura puede perder nitidez al acercarse mucho y algunos iconos externos pueden faltar. No se han probado todos los dispositivos físicos ni todas las importaciones posibles. El Word está generado y comprobado estructuralmente, pero no se ha revisado su paginación por falta de LibreOffice en este entorno.
+
+La compilación estática se ha abierto bajo `/visor-gis/`, cargando datos, PNOA, terreno y edificios con sus workers locales.
 
 ```powershell
 npm.cmd test
@@ -161,4 +172,4 @@ npm.cmd run build:pages
 npm.cmd run check:routing
 ```
 
-Los servicios pueden fallar por cuota, conexión o cambios del proveedor. No se ha probado cualquier archivo grande; GeoJSON completos consumen memoria. La auditoría previa dejó 11 avisos transitivos de dependencias y persiste el aviso de tamaño de compilación. `docs/VERIFICACION.md` distingue evidencias anteriores y actuales e indica el estado de revisión visual del Word.
+El estado de revisión visual del Word se indica en la guía de verificación. Compilar localmente tampoco demuestra que Pages haya publicado esta versión.

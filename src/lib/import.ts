@@ -43,7 +43,7 @@ export function prepareImport(raw: unknown, name: string, crs = 'EPSG:4326', idP
 export async function fetchGeoJson(url: string, signal?: AbortSignal, timeoutMs = 30_000): Promise<unknown> {
   const endpoint = importUrl(url);
   const kind = classifyImportUrl(endpoint.href);
-  if (kind === 'wms' || kind === 'wmts') throw new Error(`Este enlace es un servicio ${kind.toUpperCase()}. Regístralo en «Fuentes ráster»; no contiene entidades GeoJSON.`);
+  if (kind === 'wms' || kind === 'wmts') throw new Error(`Este enlace es un servicio ${kind.toUpperCase()}. Regístralo en «Importar WMS o WMTS»; no contiene entidades GeoJSON.`);
   if (signal?.aborted) throw signal.reason || new DOMException('Solicitud cancelada', 'AbortError');
   const controller = new AbortController();
   let timedOut = false;

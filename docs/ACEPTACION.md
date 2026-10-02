@@ -1,29 +1,30 @@
-# Qué funciona y qué falta en la versión 1.1
+# Qué funciona y qué falta · versión 1.2
 
 ## Implementado
 
-- Capas vectoriales con estilos, visibilidad y opacidad.
-- Rectángulo y selección libre por puntos, con cálculo al cerrar.
+- Capas vectoriales con estilos, visibilidad, orden y opacidad.
+- Rectángulo y selección libre por puntos, calculando al cerrar.
 - Recuento por intersección, estadísticas y exportaciones.
 - Rutas reales en coche y búsqueda de direcciones.
-- Alcance en coche de 5 a 60 minutos y exportación GeoJSON.
-- Terreno deck.gl con capas adaptadas a la superficie.
-- Fondos regionales con cartografía visible fuera de cobertura, PNOA e hidrografía.
-- Importación GeoJSON y fuentes de imágenes compatibles.
-- Paneles plegables y adaptación a pantallas pequeñas.
-- Modo local con backend y modo estático para GitHub Pages.
+- Isócronas en coche de 5–60 minutos y exportación GeoJSON.
+- Terreno deck.gl con capas apoyadas en su superficie e iluminación neutra.
+- Claro, Oscuro, Cartográfico, Satélite y PNOA; apoyo satélite de PNOA independiente del tema anterior.
+- Relieve Mapterhorn y alternativa AWS; recuperación del nivel disponible sin desplazar la geometría.
+- Hidrografía y servicios temáticos integrados en Capas; registro de WMS/WMTS en Importar.
+- Edificios opcionales de OpenFreeMap con alturas orientativas validadas.
+- Paneles plegables, adaptación a pantallas pequeñas y modos local y estático.
 
 ## Límites actuales
 
-- Las imágenes WMS/WMTS no aportan entidades al análisis.
+- WMS/WMTS y edificios del fondo no aportan entidades al recuento GIS.
 - No hay rutas a pie o en bicicleta ni tráfico en tiempo real.
-- No hay cuentas de usuario ni datos compartidos entre navegadores.
+- No hay cuentas ni datos compartidos entre navegadores.
 - No se admite cualquier formato, sistema de coordenadas o WMTS.
-- El terreno es aproximado y su extensión es experimental; no modela edificios ni puentes.
-- El alcance no mide batería ni garantiza acceso a cada punto interior.
-- Los archivos grandes pueden ralentizar el navegador.
-- La versión 1.1 se entrega en `main`; la disponibilidad del sitio depende de que GitHub Actions complete el despliegue.
+- El terreno es aproximado y TerrainExtension es experimental. Edificios en pendiente pueden deformarse; no es fotogrametría ni una representación completa de puentes/interiores.
+- Las isócronas no miden batería ni garantizan acceso directo a cada punto interior.
+- Archivos grandes y 3D pueden ralentizar el navegador; los proveedores necesitan conexión.
+- Mapbox se ha investigado y documentado, pero no está integrado.
 
 ## Pendiente
 
-La evolución prevista incluye usuarios, una base compartida y servicios adecuados para más datos. También queda probar dispositivos táctiles físicos y resolver los avisos pendientes de dependencias. Consulta las [pruebas y sus límites](VERIFICACION.md).
+Usuarios, base compartida, servicios para más datos, reducir la carga inicial y revisar dependencias. También quedan pruebas en dispositivos táctiles físicos. Consulta [comprobaciones y pendientes](VERIFICACION.md): una función implementada no equivale a una comprobación en todas las GPU o a su publicación en Pages.

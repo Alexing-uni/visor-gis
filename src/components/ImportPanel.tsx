@@ -44,6 +44,6 @@ export function ImportPanel({ onImport }: { onImport: (items: ImportedLayer[]) =
     {error && <Alert role="alert" type="error" message={error}/>}
     {success && <Alert role="status" type="success" message={success}/>}
     <p className="tool-note">Máximo 30 MiB por archivo. Los datos importados se guardan en este navegador (IndexedDB), también en modo local. Conserva el original: borrar los datos del navegador elimina estas copias.</p>
-    <p className="tool-note">Una página con un visor no es un archivo geográfico. WMS y WMTS son imágenes: se registran como fuentes ráster y no añaden entidades al análisis. Shapefile, KML y GeometryCollection requieren conversión previa.</p>
+    <p className="tool-note">Una página con un visor no es un archivo geográfico. Puedes registrar imágenes WMS y WMTS en el formulario de abajo. Shapefile, KML y GeometryCollection requieren conversión previa.</p>
   </section>;
 }

@@ -1,6 +1,6 @@
 # Publicar en GitHub Pages
 
-La versión 1.1 se envía a `main`, que activa el workflow de publicación. Revisa el resultado en Actions antes de considerar disponible la web.
+Subir una actualización a `main` activa el workflow de publicación. La versión 1.2 se prepara en local; revisa Actions después del envío antes de considerar actualizada la web.
 
 GitHub Pages sirve los archivos de la web. No ejecuta Express ni SQLite: por eso el proyecto incluye un modo estático que guarda ajustes e importaciones en el navegador. No hay sincronización entre usuarios o dispositivos.
 
